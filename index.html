@@ -3,713 +3,1579 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f4f5f7">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="AC Tracker">
-  <title>AC Tracker Minimal</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#f6f7fb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Home Energy" />
+  <title>Home Energy Tracker</title>
 
   <style>
     :root{
-      --bg: #f4f5f7;
-      --card: rgba(255,255,255,0.78);
-      --card-solid:#ffffff;
-      --text:#111214;
-      --sub:#6e7480;
-      --line:rgba(0,0,0,0.08);
+      --bg:#f6f7fb;
+      --card:rgba(255,255,255,.82);
+      --solid:#fff;
+      --text:#121318;
+      --muted:#737b8c;
+      --line:rgba(17,19,24,.08);
       --blue:#2f80ff;
-      --blue-soft:#eaf2ff;
-      --green:#20b26b;
-      --red:#ff5a5f;
+      --blue2:#7bb4ff;
+      --soft-blue:#eaf2ff;
+      --green:#1ab66f;
+      --soft-green:#eaf8f1;
+      --red:#ff5c67;
+      --soft-red:#fff1f3;
       --orange:#ff9f0a;
-      --shadow: 0 12px 40px rgba(17,18,20,0.08);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
+      --soft-orange:#fff5e5;
+      --shadow:0 18px 50px rgba(23,30,45,.09);
+      --r-xl:30px;
+      --r-lg:22px;
+      --r-md:16px;
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+
     html,body{
       margin:0;
-      background:
-        radial-gradient(circle at top left, rgba(47,128,255,0.08), transparent 28%),
-        radial-gradient(circle at top right, rgba(255,255,255,0.8), transparent 20%),
-        linear-gradient(180deg, #f7f8fa 0%, #eef1f6 100%);
       color:var(--text);
-      font-family:
-        "SF Pro Display",
-        "SF Pro Text",
-        -apple-system,
-        BlinkMacSystemFont,
-        "Inter",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(47,128,255,.10),transparent 30%),
+        radial-gradient(circle at 92% 0%,rgba(26,182,111,.08),transparent 26%),
+        linear-gradient(180deg,#fbfcff 0%,#edf1f7 100%);
     }
 
-    .app{max-width:1180px;margin:0 auto;padding:24px;}
-
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;}
-    .topbar-left h1{margin:0;font-size:clamp(26px,4vw,34px);font-weight:800;letter-spacing:-0.045em;}
-    .topbar-left p{margin:6px 0 0;color:var(--sub);font-size:14px;}
-
-    .status-pill{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,0.72);border:1px solid rgba(255,255,255,0.8);backdrop-filter:blur(18px);box-shadow:var(--shadow);color:var(--sub);font-size:13px;white-space:nowrap;}
-    .status-dot{width:10px;height:10px;border-radius:50%;background:#b0b6c2;transition:0.25s;}
-    body.running .status-dot{background:var(--green);box-shadow:0 0 0 6px rgba(32,178,107,0.12);}
-
-    .layout{display:grid;grid-template-columns:1.08fr 0.92fr;gap:18px;align-items:start;}
-    .stack{display:grid;gap:18px;}
-    .card{background:var(--card);border:1px solid rgba(255,255,255,0.75);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:var(--shadow);border-radius:var(--radius-xl);overflow:hidden;}
-
-    .hero{padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.72));}
-    .hero-grid{display:grid;grid-template-columns:1fr 260px;gap:18px;align-items:center;}
-    .eyebrow{font-size:13px;color:var(--sub);margin-bottom:8px;}
-    .hero h2{margin:0;font-size:clamp(32px,5vw,56px);line-height:0.95;letter-spacing:-0.06em;font-weight:800;font-variant-numeric:tabular-nums;}
-    .hero .unit{font-size:18px;color:var(--sub);margin-left:8px;font-weight:500;}
-    .hero-sub{margin-top:10px;color:var(--sub);font-size:14px;line-height:1.5;max-width:460px;}
-    .hero-badges{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    .badge{background:rgba(255,255,255,0.8);border:1px solid var(--line);border-radius:18px;padding:12px;}
-    .badge span{display:block;font-size:11px;color:var(--sub);margin-bottom:6px;}
-    .badge strong{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
-
-    .ac-visual{height:220px;border-radius:24px;background:linear-gradient(180deg,#ffffff,#eef4ff);border:1px solid rgba(47,128,255,0.08);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-    .ac-visual::before{content:"";position:absolute;inset:18px;border-radius:28px;background:radial-gradient(circle at top,rgba(47,128,255,0.1),transparent 62%);}
-    .ac-visual svg{position:relative;z-index:1;}
-
-    .live-card,.settings-card,.history-card,.calibration-card{padding:20px;}
-    .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
-    .section-head h3{margin:0;font-size:18px;letter-spacing:-0.02em;}
-    .section-head p{margin:4px 0 0;font-size:12px;color:var(--sub);line-height:1.45;}
-    .chip{padding:8px 12px;background:var(--blue-soft);border-radius:999px;font-size:12px;color:var(--blue);font-weight:800;white-space:nowrap;}
-    .chip.orange{background:#fff5e5;color:var(--orange);}
-    .chip.green{background:#e9f8f1;color:var(--green);}
-
-    .live-main{text-align:center;padding:8px 0 18px;}
-    .timer{font-size:20px;color:var(--sub);font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:8px;}
-    .live-cost{font-size:clamp(54px,9vw,82px);line-height:0.92;font-weight:800;letter-spacing:-0.08em;font-variant-numeric:tabular-nums;}
-    .live-cost-sub{color:var(--sub);font-size:14px;margin-top:10px;}
-
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-    .stat{background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:14px 12px;}
-    .stat span{display:block;color:var(--sub);font-size:11px;margin-bottom:6px;}
-    .stat strong{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
-
-    .actions,.settings-actions,.calibration-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .btn{border:none;cursor:pointer;border-radius:18px;min-height:54px;padding:14px 16px;font-size:15px;font-weight:800;transition:0.2s;}
-    .btn:active{transform:scale(0.99);}
-    .btn-primary{background:linear-gradient(180deg,#3b8cff,#2f80ff);color:white;box-shadow:0 10px 22px rgba(47,128,255,0.25);}
-    .btn-dark{background:#111214;color:white;}
-    .btn-soft{background:#f0f2f6;color:#2f3640;}
-    .btn-danger{background:#fff1f1;color:var(--red);}
-    .btn:disabled{opacity:0.55;cursor:not-allowed;box-shadow:none;}
-
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .field{display:grid;gap:7px;}
-    .field.full{grid-column:1/-1;}
-    label{font-size:12px;color:var(--sub);font-weight:700;}
-    input,select{width:100%;border:none;outline:none;background:#ffffff;border:1px solid var(--line);border-radius:16px;padding:14px 14px;font-size:14px;color:var(--text);font-weight:700;}
-    input:focus,select:focus{border-color:rgba(47,128,255,0.28);box-shadow:0 0 0 4px rgba(47,128,255,0.10);}
-    .settings-actions,.calibration-actions{margin-top:14px;}
-
-    .note{margin-top:12px;background:#f7faff;border:1px solid rgba(47,128,255,0.1);color:#4d627f;border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.55;}
-    .note.warning{background:#fff9ed;border-color:rgba(255,159,10,0.22);color:#7a5516;}
-
-    .baseline-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
-    .baseline-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;}
-    .baseline-box span{display:block;color:var(--sub);font-size:11px;margin-bottom:6px;}
-    .baseline-box strong{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
-
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;}
-    .small-btn{border:none;background:#f0f2f6;color:#586171;border-radius:999px;padding:8px 12px;cursor:pointer;font-size:12px;font-weight:800;}
-    .history-list{display:grid;gap:10px;max-height:560px;overflow:auto;padding-right:4px;}
-    .history-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:14px;}
-    .history-icon{width:42px;height:42px;border-radius:14px;background:#eef5ff;display:grid;place-items:center;color:var(--blue);font-size:18px;}
-    .history-main strong{display:block;font-size:14px;margin-bottom:3px;}
-    .history-main span{color:var(--sub);font-size:12px;line-height:1.45;}
-    .history-cost{font-size:15px;font-weight:800;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;}
-    .history-cost small{display:block;font-size:11px;color:var(--sub);font-weight:700;margin-top:2px;}
-    .empty{text-align:center;color:var(--sub);padding:34px 12px;border-radius:20px;border:1px dashed var(--line);background:#ffffff;line-height:1.6;}
-
-    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:rgba(17,18,20,0.92);color:white;padding:12px 16px;border-radius:999px;font-size:13px;font-weight:800;transition:0.24s;z-index:50;}
-    .toast.show{transform:translateX(-50%) translateY(0);}
-
-    @media (max-width:960px){.layout{grid-template-columns:1fr;}}
-    @media (max-width:680px){
-      .app{padding:16px}.topbar{align-items:flex-start;flex-direction:column}.hero-grid{grid-template-columns:1fr}.hero-badges,.stats,.form-grid,.actions,.settings-actions,.calibration-actions,.baseline-panel{grid-template-columns:1fr}.history-item{grid-template-columns:auto 1fr}.history-cost{grid-column:2;text-align:left;}
+    .app{
+      max-width:1280px;
+      margin:0 auto;
+      padding:24px;
     }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:20px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:clamp(30px,4.5vw,46px);
+      font-weight:900;
+      letter-spacing:-.07em;
+    }
+
+    .brand p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:9px 13px;
+      background:rgba(255,255,255,.82);
+      box-shadow:var(--shadow);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:750;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#b6becb;
+    }
+
+    .dot.ok{
+      background:var(--green);
+      box-shadow:0 0 0 6px rgba(26,182,111,.13);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.14fr .86fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.78);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(22px);
+      border-radius:var(--r-xl);
+      overflow:hidden;
+    }
+
+    .section{
+      padding:20px;
+    }
+
+    .head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .head h2,.head h3{
+      margin:0;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+
+    .head p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:8px 12px;
+      background:var(--soft-blue);
+      color:var(--blue);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .chip.green{ background:var(--soft-green); color:var(--green); }
+    .chip.orange{ background:var(--soft-orange); color:var(--orange); }
+
+    .hero{
+      padding:24px;
+      background:linear-gradient(180deg,rgba(255,255,255,.93),rgba(255,255,255,.72));
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1fr 260px;
+      gap:20px;
+      align-items:center;
+    }
+
+    .eyebrow{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+
+    .amount{
+      font-size:clamp(48px,7vw,76px);
+      line-height:.9;
+      font-weight:900;
+      letter-spacing:-.085em;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .amount .unit{
+      font-size:18px;
+      letter-spacing:0;
+      color:var(--muted);
+      font-weight:800;
+      margin-left:8px;
+    }
+
+    .hero-sub{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:20px;
+    }
+
+    .metric,.stat,.mini{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:13px;
+    }
+
+    .metric span,.stat span,.mini span{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      margin-bottom:7px;
+    }
+
+    .metric strong,.stat strong,.mini strong{
+      font-size:15px;
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .visual{
+      height:230px;
+      border-radius:26px;
+      background:linear-gradient(180deg,#fff,#edf5ff);
+      border:1px solid rgba(47,128,255,.10);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .visual:before{
+      content:"";
+      position:absolute;
+      inset:22px;
+      border-radius:28px;
+      background:radial-gradient(circle at center,rgba(47,128,255,.12),transparent 60%);
+    }
+
+    .visual svg{
+      position:relative;
+      z-index:1;
+    }
+
+    .active-grid{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    .live-box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:20px;
+    }
+
+    .label{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .timer{
+      margin-top:7px;
+      font-size:20px;
+      color:var(--muted);
+      font-weight:800;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .live-amount{
+      margin-top:8px;
+      font-size:clamp(44px,7vw,66px);
+      line-height:.95;
+      font-weight:900;
+      letter-spacing:-.08em;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .sub{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .mini-grid{
+      display:grid;
+      gap:10px;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+      max-height:430px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .row,.active-item{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+
+    .icon{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      background:#eef5ff;
+      display:grid;
+      place-items:center;
+      font-size:18px;
+      flex-shrink:0;
+    }
+
+    .row strong{
+      display:block;
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .row span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .cost{
+      font-weight:900;
+      color:var(--green);
+      font-size:15px;
+      white-space:nowrap;
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .empty{
+      background:#fff;
+      border:1px dashed var(--line);
+      border-radius:20px;
+      color:var(--muted);
+      padding:28px 12px;
+      text-align:center;
+      line-height:1.6;
+    }
+
+    .active-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .active-title{
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .active-sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+      line-height:1.45;
+    }
+
+    .device-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+
+.device{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:14px;
+  display:grid;
+  gap:12px;
+  min-width:0;
+}
+
+.device-top{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:start;
+  min-width:0;
+}
+
+.device h4{
+  margin:0;
+  font-size:15px;
+  line-height:1.35;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+  line-height:1.35;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.device-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.device-thumb{
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  object-fit:cover;
+  background:#f3f5f8;
+  border:1px solid var(--line);
+  flex-shrink:0;
+}
+.status{
+  border-radius:999px;
+  padding:7px 10px;
+  background:#f1f3f6;
+  color:#657084;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+    .status.on{
+      background:var(--soft-green);
+      color:var(--green);
+    }
+
+    .device-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      min-height:46px;
+      padding:11px 14px;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.18s;
+    }
+
+    .btn:active{ transform:scale(.99); }
+    .primary{ background:linear-gradient(180deg,#3b8cff,#2f80ff); color:white; box-shadow:0 10px 22px rgba(47,128,255,.22); }
+    .dark{ background:#111318; color:white; }
+    .soft{ background:#eef1f6; color:#596477; }
+    .danger{ background:var(--soft-red); color:var(--red); }
+    .ghost{ background:#f5f6f9; color:#6d7585; }
+
+    .form{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .field{
+      display:grid;
+      gap:7px;
+    }
+
+    .field.full{
+      grid-column:1/-1;
+    }
+
+    label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+    }
+
+    input,select{
+      width:100%;
+      border:1px solid var(--line);
+      outline:0;
+      background:white;
+      border-radius:16px;
+      padding:14px;
+      font-size:14px;
+      color:var(--text);
+      font-weight:750;
+    }
+
+    input:focus,select:focus{
+      border-color:rgba(47,128,255,.32);
+      box-shadow:0 0 0 4px rgba(47,128,255,.10);
+    }
+
+    .note{
+      margin-top:12px;
+      border-radius:16px;
+      padding:12px 14px;
+      background:#f8fbff;
+      border:1px solid rgba(47,128,255,.11);
+      color:#526987;
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .tool{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .small{
+      border:0;
+      background:#eef1f6;
+      color:#5d6675;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .small.danger{
+      background:var(--soft-red);
+      color:var(--red);
+    }
+
+    .chart{
+      display:grid;
+      gap:10px;
+    }
+
+    .bar-row{
+      display:grid;
+      grid-template-columns:112px 1fr 76px;
+      gap:10px;
+      align-items:center;
+    }
+
+    .bar-name{
+      font-size:12px;
+      font-weight:850;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .bar-track{
+      height:12px;
+      background:#edf1f7;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      height:100%;
+      width:0;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--blue),var(--blue2));
+    }
+
+    .bar-value{
+      text-align:right;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .profile-box{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      margin-bottom:14px;
+    }
+
+    .profile-avatar{
+      width:56px;
+      height:56px;
+      border-radius:18px;
+      object-fit:cover;
+      background:#eef3f9;
+      border:1px solid var(--line);
+      flex-shrink:0;
+    }
+
+    .profile-meta{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .profile-meta strong{
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .profile-meta span{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .device-thumb,.list-thumb{
+      width:46px;
+      height:46px;
+      border-radius:15px;
+      object-fit:cover;
+      background:#f3f5f8;
+      border:1px solid var(--line);
+      flex-shrink:0;
+    }
+
+    .row-media{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .row-media > div{
+      min-width:0;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(15,18,25,.35);
+      display:none;
+      place-items:center;
+      z-index:80;
+      padding:18px;
+    }
+
+    .modal-backdrop.show{
+      display:grid;
+    }
+
+    .modal{
+      width:min(520px,100%);
+      background:#fff;
+      border-radius:28px;
+      box-shadow:0 30px 80px rgba(0,0,0,.22);
+      padding:20px;
+    }
+
+    .modal h3{
+      margin:0 0 8px;
+      font-size:20px;
+      letter-spacing:-.03em;
+    }
+
+    .modal p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin:0 0 16px;
+    }
+
+    .modal-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%) translateY(120px);
+      background:rgba(17,18,20,.94);
+      color:#fff;
+      padding:12px 16px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:900;
+      transition:.24s;
+      z-index:99;
+    }
+
+    .toast.show{
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media(max-width:1080px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
+    @media(max-width:760px){
+      .app{ padding:16px; }
+      .top{ flex-direction:column; }
+      .hero-grid,.active-grid,.metrics,.form,.device-grid,.active-stats{ grid-template-columns:1fr; }
+      .row{ grid-template-columns:auto 1fr; }
+      .cost{ grid-column:2; text-align:left; }
+      .bar-row{ grid-template-columns:88px 1fr 64px; }
+      .device-actions{ grid-template-columns:1fr 1fr 1fr; }
+    }
+    .device{
+  min-width:0;
+}
+
+.device-top{
+  min-width:0;
+}
+
+.device h4{
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+.meta{
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+}
+
+.row-media{
+  min-width:0;
+}
+
+.row-media > div{
+  min-width:0;
+}
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="topbar">
-      <div class="topbar-left">
-        <h1>AC Usage Tracker</h1>
-        <p id="subtitle">Mitsubishi AC · Living Room</p>
+    <div class="top">
+      <div class="brand">
+        <h1>Home Energy Tracker</h1>
+        <p id="subtitle">Premium shared dashboard for multi-device energy usage</p>
       </div>
-      <div class="status-pill"><span class="status-dot"></span><span id="statusText">OFF · Ready to track</span></div>
+      <div class="pill">
+        <span class="dot" id="cloudDot"></span>
+        <span id="cloudText">Connecting Firebase...</span>
+      </div>
     </div>
 
-    <div class="layout">
+    <div class="grid">
       <div class="stack">
         <section class="card hero">
           <div class="hero-grid">
             <div>
-              <div class="eyebrow">ค่าไฟแอร์เดือนนี้</div>
-              <div><h2><span id="monthlyTotal">0.00</span><span class="unit">บาท</span></h2></div>
-              <div class="hero-sub" id="monthLabel">คำนวณแบบค่าไฟขั้นบันได โดยใช้ฐานไฟบ้านจากบิลล่าสุด</div>
-
-              <div class="hero-badges">
-                <div class="badge"><span>ชั่วโมงรวม</span><strong id="monthlyHours">0.0 ชม.</strong></div>
-                <div class="badge"><span>พลังงานแอร์</span><strong id="monthlyKwh">0.00 kWh</strong></div>
-                <div class="badge"><span>เฉลี่ย / ครั้ง</span><strong id="avgCost">0.00 บ.</strong></div>
+              <div class="eyebrow">ค่าไฟรวมของเดือนนี้</div>
+              <div class="amount"><span id="monthlyTotal">0.00</span><span class="unit">บาท</span></div>
+              <div class="hero-sub" id="monthLabel">สรุปรวมจากทุกคน ทุกอุปกรณ์ ภายใต้ Home Code เดียวกัน</div>
+              <div class="metrics">
+                <div class="metric"><span>พลังงานรวม</span><strong id="monthlyKwh">0.00 kWh</strong></div>
+                <div class="metric"><span>จำนวนรอบ</span><strong id="sessionCount">0</strong></div>
+                <div class="metric"><span>อุปกรณ์เปิดอยู่</span><strong id="activeCount">0</strong></div>
+                <div class="metric"><span>Live cost ตอนนี้</span><strong id="activeLiveCost">0.00 ฿</strong></div>
               </div>
             </div>
-
-            <div class="ac-visual">
-              <svg width="210" height="170" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="visual">
+              <svg width="210" height="160" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#EAF2FF"/></linearGradient>
-                  <linearGradient id="airGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8DD1FF" stop-opacity="0.9"/><stop offset="100%" stop-color="#DDF4FF" stop-opacity="0"/></linearGradient>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#EAF2FF"/></linearGradient>
+                  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8DD1FF" stop-opacity=".9"/><stop offset="1" stop-color="#DDF4FF" stop-opacity="0"/></linearGradient>
                 </defs>
-                <rect x="25" y="18" width="160" height="54" rx="20" fill="url(#bodyGrad)" stroke="#DDE8F5"/>
+                <rect x="25" y="18" width="160" height="54" rx="20" fill="url(#g1)" stroke="#DDE8F5"/>
                 <rect x="40" y="34" width="98" height="10" rx="5" fill="#EDF4FC"/>
                 <circle cx="162" cy="45" r="5" fill="#C7D9EF"/>
                 <rect x="42" y="63" width="126" height="8" rx="4" fill="#DDEBFA"/>
-                <path d="M65 84 C58 104, 60 121, 73 138" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
-                <path d="M105 84 C98 108, 100 126, 112 144" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
-                <path d="M145 84 C138 104, 140 121, 153 138" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M65 84 C58 104,60 121,73 138" stroke="url(#g2)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M105 84 C98 108,100 126,112 144" stroke="url(#g2)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M145 84 C138 104,140 121,153 138" stroke="url(#g2)" stroke-width="8" stroke-linecap="round"/>
                 <ellipse cx="105" cy="152" rx="72" ry="10" fill="#E9F2FF"/>
               </svg>
             </div>
           </div>
         </section>
 
-        <section class="card live-card">
-          <div class="section-head">
-            <div><h3>Real-time Tracking</h3><p>กดเริ่มเมื่อเปิดแอร์ และกดหยุดเมื่อปิดแอร์</p></div>
-            <div class="chip" id="modeChip">Tiered Bill</div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h2>Active Now</h2>
+              <p>ดูว่า ณ ตอนนี้มีอุปกรณ์ที่กำลังเปิดอยู่กี่อัน และใช้ไฟ live เท่าไหร่</p>
+            </div>
+            <div class="chip green" id="activeChip">0 running</div>
           </div>
+          <div class="active-grid">
+            <div class="live-box">
+              <div class="label">Live cost รวมตอนนี้</div>
+              <div class="timer" id="activeLiveTimer">00:00:00</div>
+              <div class="live-amount" id="liveTotalCost">0.000</div>
+              <div class="sub">บาท · เปิดอยู่ <span id="liveRunningCount">0</span> อุปกรณ์ · ใช้ไฟรวม <span id="liveTotalKwh">0.000</span> kWh</div>
+            </div>
+            <div class="mini-grid">
+              <div class="mini"><span>อุปกรณ์ที่เปิดอยู่</span><strong id="miniActiveDevices">0 เครื่อง</strong></div>
+              <div class="mini"><span>สมาชิกกำลังใช้งาน</span><strong id="miniActiveMembers">0 คน</strong></div>
+              <div class="mini"><span>พลังงาน live รวม</span><strong id="miniLiveKwh">0.000 kWh</strong></div>
+            </div>
+          </div>
+          <div style="margin-top:16px" class="list" id="activeList"></div>
+        </section>
 
-          <div class="live-main">
-            <div class="timer" id="timer">00:00:00</div>
-            <div class="live-cost" id="liveCost">0.000</div>
-            <div class="live-cost-sub">บาท · ค่าไฟรอบปัจจุบันแบบขั้นบันได</div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Visual Insights</h3>
+              <p>ดูภาพรวมแบบกราฟว่าใคร/อุปกรณ์ไหนใช้ไฟมากสุด</p>
+            </div>
           </div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
+            <div><div class="chip" style="margin-bottom:10px">By Member</div><div class="chart" id="memberChart"></div></div>
+            <div><div class="chip" style="margin-bottom:10px">By Device</div><div class="chart" id="deviceChart"></div></div>
+          </div>
+        </section>
 
-          <div class="stats">
-            <div class="stat"><span>AC Power</span><strong id="livePower">1.12 kW</strong></div>
-            <div class="stat"><span>Energy Used</span><strong id="liveKwh">0.000 kWh</strong></div>
-            <div class="stat"><span>Current Tier</span><strong id="currentTier">-</strong></div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Summary by Member</h3>
+              <p>ดูว่าใครใช้ไฟไปเท่าไหร่ในเดือนนี้</p>
+            </div>
           </div>
+          <div class="list" id="memberSummary"></div>
+        </section>
 
-          <div class="actions">
-            <button class="btn btn-primary" id="toggleBtn">Turn ON ⏰</button>
-            <button class="btn btn-soft" id="cancelBtn" disabled>Cancel Session</button>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Cloud Usage History</h3>
+              <p>ประวัติการใช้งานที่ปิดรอบแล้ว</p>
+            </div>
+            <div class="tool">
+              <button class="small" id="exportBtn">Export CSV</button>
+              <button class="small danger" id="clearHistoryBtn">Clear History</button>
+            </div>
           </div>
+          <div class="list" id="historyList"></div>
         </section>
       </div>
 
       <div class="stack">
-        <section class="card settings-card">
-          <div class="section-head"><div><h3>Settings</h3><p>ตั้งค่าแอร์ของคุณ</p></div></div>
-
-          <div class="form-grid">
-            <div class="field full"><label for="acName">ชื่อแอร์ / ห้อง</label><input id="acName" type="text" placeholder="เช่น Mitsubishi AC · Living Room"></div>
-            <div class="field"><label for="powerKw">กำลังไฟฟ้าจากป้ายเครื่อง (kW)</label><input id="powerKw" type="number" step="0.01" min="0.1" placeholder="1.12"></div>
-            <div class="field"><label for="target">งบค่าแอร์ / เดือน</label><input id="target" type="number" step="1" min="0" placeholder="1000"></div>
-            <div class="field"><label for="efficiency">โหมดประมาณการ</label><select id="efficiency"><option value="fixed">Fixed kW</option><option value="inverter">Inverter Estimate (-25%)</option></select></div>
-            <div class="field"><label for="flatRate">Flat rate สำรอง (บาท/kWh)</label><input id="flatRate" type="number" step="0.01" min="0" placeholder="4.00"></div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Profile & Home Setup</h3>
+              <p>ทุกคนที่ใช้ Home Code เดียวกันจะเห็น dashboard บ้านเดียวกัน</p>
+            </div>
+            <div class="chip" id="homeChip">HOME</div>
           </div>
 
-          <div class="settings-actions">
-            <button class="btn btn-dark" id="saveSettingsBtn">Save Settings</button>
-            <button class="btn btn-danger" id="resetMonthBtn">Reset Month</button>
+          <div class="profile-box">
+            <img id="profileAvatarView" class="profile-avatar" src="./assets/profile-default.png" alt="profile" onerror="this.src='https://placehold.co/112x112/eef3f9/737b8c?text=Me'">
+            <div class="profile-meta">
+              <strong id="profileNameView">Member</strong>
+              <span id="profileCodeView">HOME</span>
+            </div>
           </div>
-          <div class="note">ใช้กำลังไฟฟ้า 1.12 kW จากป้ายแอร์ Mitsubishi ของคุณได้เลย ส่วนค่าไฟจะคำนวณแบบขั้นบันไดจากฐานไฟบ้านด้านล่าง</div>
+
+          <div class="form">
+            <div class="field"><label for="homeCode">Home Code</label><input id="homeCode" type="text" placeholder="เช่น EVEHOME" /></div>
+            <div class="field"><label for="memberName">ชื่อผู้ใช้</label><input id="memberName" type="text" placeholder="เช่น Eve / Brother" /></div>
+            <div class="field"><label for="baseHouseKwh">ฐานไฟบ้านที่ไม่ track / เดือน</label><input id="baseHouseKwh" type="number" min="0" step="1" placeholder="เช่น 300" /></div>
+            <div class="field"><label for="flatRate">Flat rate สำรอง</label><input id="flatRate" type="number" min="0" step="0.01" placeholder="4.00" /></div>
+            <div class="field full"><label for="profileAvatarUrl">Profile Image URL</label><input id="profileAvatarUrl" type="text" placeholder="เช่น ./assets/me.png หรือ https://..." /></div>
+          </div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn dark" id="saveSetupBtn">Save Setup</button>
+            <button class="btn soft" id="refreshBtn">Refresh Cloud</button>
+          </div>
+          <div class="note">ส่งลิงก์เว็บ + Home Code เดียวกันให้คนในบ้านใช้ เช่น <b>EVEHOME</b> แต่ละคนกรอกชื่อของตัวเอง แล้วกด Start ที่อุปกรณ์ที่กำลังใช้งาน</div>
         </section>
 
-        <section class="card calibration-card">
-          <div class="section-head">
-            <div><h3>Bill Calibration</h3><p>วิธีนี้ง่ายและใกล้จริงสุด: ตอนบิลมา ให้กรอก “หน่วยไฟรวมจากบิล” แล้วแอพจะแยกฐานไฟบ้านที่ไม่ใช่แอร์ให้</p></div>
-            <div class="chip green" id="baselineStatus">Not set</div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3 id="deviceFormTitle">Add Device</h3>
+              <p>เพิ่มหรือแก้ไขอุปกรณ์ เช่น Laptop, Rice Cooker, Monitor</p>
+            </div>
           </div>
-
-          <div class="form-grid">
-            <div class="field"><label for="billUnits">หน่วยไฟรวมจากบิลล่าสุด</label><input id="billUnits" type="number" step="1" min="0" placeholder="เช่น 480"></div>
-            <div class="field"><label for="manualBaseKwh">ฐานไฟบ้านที่ไม่ใช่แอร์ / เดือน</label><input id="manualBaseKwh" type="number" step="1" min="0" placeholder="คำนวณให้อัตโนมัติ"></div>
+          <div class="form">
+            <div class="field"><label for="newDeviceName">ชื่ออุปกรณ์</label><input id="newDeviceName" type="text" placeholder="เช่น แอร์ / Gaming PC" /></div>
+            <div class="field"><label for="newDeviceCategory">หมวดหมู่</label><input id="newDeviceCategory" type="text" placeholder="เช่น Air Conditioner / Computer" /></div>
+            <div class="field"><label for="newDeviceKw">กำลังไฟ (kW)</label><input id="newDeviceKw" type="number" min="0.001" step="0.01" placeholder="0.45" /></div>
+            <div class="field"><label for="newDeviceImage">Custom Image URL</label><input id="newDeviceImage" type="text" placeholder="ไม่กรอก = เลือกรูปให้อัตโนมัติ" /></div>
           </div>
-
-          <div class="calibration-actions">
-            <button class="btn btn-primary" id="calibrateBtn">Calibrate from Bill</button>
-            <button class="btn btn-soft" id="saveBaseBtn">Save Manual Base</button>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn primary" id="saveDeviceBtn">Add Device</button>
+            <button class="btn ghost" id="cancelEditBtn">Clear</button>
           </div>
-
-          <div class="baseline-panel">
-            <div class="baseline-box"><span>ฐานไฟบ้าน</span><strong id="baseKwhText">0 kWh</strong></div>
-            <div class="baseline-box"><span>แอร์เดือนนี้</span><strong id="acKwhText">0 kWh</strong></div>
-            <div class="baseline-box"><span>หน่วยรวมประเมิน</span><strong id="estimatedTotalKwh">0 kWh</strong></div>
-          </div>
-
-          <div class="note warning" id="calibrationNote">เดือนแรกให้ใช้แอพเก็บชั่วโมงแอร์ไปก่อน พอบิลไฟมาแล้วค่อยกรอกหน่วยไฟรวมจากบิล ระบบจะประเมินฐานไฟบ้านและคำนวณค่าแอร์ใหม่ให้ใกล้จริงขึ้น</div>
+          <div class="note">ถ้าไม่ใส่รูป ระบบจะเลือกรูปตามชื่อ/หมวดหมู่ เช่น แอร์, คอม, PC, พัดลม, TV</div>
         </section>
 
-        <section class="card history-card">
-          <div class="section-head">
-            <div><h3>Usage History</h3><p>เก็บรายการล่าสุดในเครื่องนี้</p></div>
-            <div class="toolbar"><button class="small-btn" id="exportBtn">Export CSV</button><button class="small-btn" id="clearHistoryBtn">Clear</button></div>
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Devices</h3>
+              <p>Start / Stop ได้พร้อมกันหลายอุปกรณ์ ลบหรือแก้ไขได้</p>
+            </div>
           </div>
-          <div class="history-list" id="historyList"></div>
+          <div class="device-grid" id="deviceGrid"></div>
         </section>
+
+        <section class="card section">
+          <div class="head">
+            <div>
+              <h3>Summary by Device</h3>
+              <p>ดูว่าอุปกรณ์ไหนกินไฟมากที่สุด</p>
+            </div>
+          </div>
+          <div class="list" id="deviceSummary"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal">
+      <h3>ยืนยันการลบประวัติ</h3>
+      <p id="confirmText">ต้องการลบประวัติทั้งหมดใช่ไหม?</p>
+      <div class="modal-actions">
+        <button class="btn soft" id="cancelClearBtn">Cancel</button>
+        <button class="btn danger" id="confirmClearBtn">Delete History</button>
       </div>
     </div>
   </div>
 
   <div class="toast" id="toast">Saved</div>
 
-  <script>
-    const STORAGE_KEY = 'ac_tracker_tiered_v3';
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy,
+      limit,
+      serverTimestamp,
+      deleteDoc,
+      doc,
+      getDocs,
+      updateDoc
+    } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
-    const defaultState = {
-      settings: {
-        acName: 'Mitsubishi AC · Living Room',
-        powerKw: 1.12,
-        target: 1000,
-        efficiency: 'fixed',
-        flatRate: 4.0,
-        baseHouseKwh: 0,
-        lastBillUnits: 0,
-        isCalibrated: false
-      },
-      history: [],
-      running: null
+    const firebaseConfig = {
+      apiKey:'AIzaSyAhn2dkWars_bKrUzRy6GowgJnY5s-P-Jg',
+      authDomain:'home-energy-tracker-91d72.firebaseapp.com',
+      projectId:'home-energy-tracker-91d72',
+      storageBucket:'home-energy-tracker-91d72.firebasestorage.app',
+      messagingSenderId:'849464430696',
+      appId:'1:849464430696:web:fd25c902069c0615e86bdd',
+      measurementId:'G-CZ1ZCVSBNL'
     };
 
-    let state = loadState();
-    let intervalId = null;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const STORAGE_KEY='home_energy_tracker_premium_v5';
 
-    const el = {
-      subtitle: document.getElementById('subtitle'),
-      statusText: document.getElementById('statusText'),
-      monthlyTotal: document.getElementById('monthlyTotal'),
-      monthLabel: document.getElementById('monthLabel'),
-      monthlyHours: document.getElementById('monthlyHours'),
-      monthlyKwh: document.getElementById('monthlyKwh'),
-      avgCost: document.getElementById('avgCost'),
-      timer: document.getElementById('timer'),
-      liveCost: document.getElementById('liveCost'),
-      livePower: document.getElementById('livePower'),
-      liveKwh: document.getElementById('liveKwh'),
-      currentTier: document.getElementById('currentTier'),
-      toggleBtn: document.getElementById('toggleBtn'),
-      cancelBtn: document.getElementById('cancelBtn'),
-      acName: document.getElementById('acName'),
-      powerKw: document.getElementById('powerKw'),
-      target: document.getElementById('target'),
-      efficiency: document.getElementById('efficiency'),
-      flatRate: document.getElementById('flatRate'),
-      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
-      resetMonthBtn: document.getElementById('resetMonthBtn'),
-      billUnits: document.getElementById('billUnits'),
-      manualBaseKwh: document.getElementById('manualBaseKwh'),
-      calibrateBtn: document.getElementById('calibrateBtn'),
-      saveBaseBtn: document.getElementById('saveBaseBtn'),
-      baselineStatus: document.getElementById('baselineStatus'),
-      baseKwhText: document.getElementById('baseKwhText'),
-      acKwhText: document.getElementById('acKwhText'),
-      estimatedTotalKwh: document.getElementById('estimatedTotalKwh'),
-      calibrationNote: document.getElementById('calibrationNote'),
-      historyList: document.getElementById('historyList'),
-      exportBtn: document.getElementById('exportBtn'),
-      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
-      toast: document.getElementById('toast')
+    const defaultDevices=[
+      {name:'Mitsubishi AC · Living Room',category:'Air Conditioner',imageUrl:'',powerKw:1.12},
+      {name:'Gaming PC',category:'Computer',imageUrl:'',powerKw:.45},
+      {name:'Fan',category:'Fan',imageUrl:'',powerKw:.06},
+      {name:'TV',category:'TV',imageUrl:'',powerKw:.10}
+    ];
+
+    let state=loadState();
+    let devices=[];
+    let sessions=[];
+    let activeSessions=[];
+    let unsubs=[];
+    let tickTimer=null;
+    let editingDeviceId=null;
+    let seeding=false;
+
+    const el={
+      subtitle:q('#subtitle'),
+      cloudDot:q('#cloudDot'),
+      cloudText:q('#cloudText'),
+      monthlyTotal:q('#monthlyTotal'),
+      monthLabel:q('#monthLabel'),
+      monthlyKwh:q('#monthlyKwh'),
+      sessionCount:q('#sessionCount'),
+      activeCount:q('#activeCount'),
+      activeLiveCost:q('#activeLiveCost'),
+      activeChip:q('#activeChip'),
+      activeLiveTimer:q('#activeLiveTimer'),
+      liveTotalCost:q('#liveTotalCost'),
+      liveRunningCount:q('#liveRunningCount'),
+      liveTotalKwh:q('#liveTotalKwh'),
+      miniActiveDevices:q('#miniActiveDevices'),
+      miniActiveMembers:q('#miniActiveMembers'),
+      miniLiveKwh:q('#miniLiveKwh'),
+      activeList:q('#activeList'),
+      homeCode:q('#homeCode'),
+      memberName:q('#memberName'),
+      baseHouseKwh:q('#baseHouseKwh'),
+      flatRate:q('#flatRate'),
+      profileAvatarUrl:q('#profileAvatarUrl'),
+      profileNameView:q('#profileNameView'),
+      profileCodeView:q('#profileCodeView'),
+      profileAvatarView:q('#profileAvatarView'),
+      saveSetupBtn:q('#saveSetupBtn'),
+      refreshBtn:q('#refreshBtn'),
+      homeChip:q('#homeChip'),
+      newDeviceName:q('#newDeviceName'),
+      newDeviceCategory:q('#newDeviceCategory'),
+      newDeviceKw:q('#newDeviceKw'),
+      newDeviceImage:q('#newDeviceImage'),
+      saveDeviceBtn:q('#saveDeviceBtn'),
+      cancelEditBtn:q('#cancelEditBtn'),
+      deviceFormTitle:q('#deviceFormTitle'),
+      deviceGrid:q('#deviceGrid'),
+      memberChart:q('#memberChart'),
+      deviceChart:q('#deviceChart'),
+      memberSummary:q('#memberSummary'),
+      deviceSummary:q('#deviceSummary'),
+      historyList:q('#historyList'),
+      exportBtn:q('#exportBtn'),
+      clearHistoryBtn:q('#clearHistoryBtn'),
+      confirmModal:q('#confirmModal'),
+      confirmText:q('#confirmText'),
+      cancelClearBtn:q('#cancelClearBtn'),
+      confirmClearBtn:q('#confirmClearBtn'),
+      toast:q('#toast')
     };
 
-    function loadState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return saved ? { ...defaultState, ...saved, settings: { ...defaultState.settings, ...saved.settings } } : structuredClone(defaultState);
-      } catch {
-        return structuredClone(defaultState);
+    function q(s){ return document.querySelector(s); }
+
+    function loadState(){
+      try{
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+          setup:{homeCode:'EVEHOME',memberName:'Eve',baseHouseKwh:0,flatRate:4,avatarUrl:''}
+        };
+      }catch{
+        return {setup:{homeCode:'EVEHOME',memberName:'Eve',baseHouseKwh:0,flatRate:4,avatarUrl:''}};
       }
     }
 
-    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
 
-    function effectivePowerKw() {
-      const base = Number(state.settings.powerKw) || 0;
-      return state.settings.efficiency === 'inverter' ? base * 0.75 : base;
+    function safeHomeCode(){
+      return (state.setup.homeCode || 'EVEHOME').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'') || 'EVEHOME';
     }
 
-    function money(val, digits = 2) {
-      return Number(val || 0).toLocaleString('th-TH', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    function money(v,d=2){
+      return Number(v||0).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
     }
 
-    function formatTimer(seconds) {
-      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
+    function formatTimer(sec){
+      const h=String(Math.floor(sec/3600)).padStart(2,'0');
+      const m=String(Math.floor((sec%3600)/60)).padStart(2,'0');
+      const s=String(sec%60).padStart(2,'0');
       return `${h}:${m}:${s}`;
     }
 
-    function monthKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; }
-
-    // อัตราขั้นบันไดแบบง่ายตามภาพที่ผู้ใช้ส่ง:
-    // 0-200 หน่วย = 3 บาท/หน่วย, ส่วนที่เกิน 200 หน่วย = 3.95 บาท/หน่วย
-    // หมายเหตุ: ถ้าต้องการตรงบิลแบบ 100% ควรเพิ่ม Ft, VAT, ค่าบริการรายเดือนจากบิลจริงในอนาคต
-    function calculateBillByTier(kwh) {
-      const units = Math.max(0, Number(kwh) || 0);
-      if (units <= 200) return units * 3.00;
-      return (200 * 3.00) + ((units - 200) * 3.95);
+    function monthKey(date=new Date()){
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
     }
 
-    function marginalCost(beforeKwh, addedKwh) {
-      return calculateBillByTier(beforeKwh + addedKwh) - calculateBillByTier(beforeKwh);
+    function bill(kwh){
+      const u=Math.max(0,Number(kwh)||0);
+      return u<=200 ? u*3 : 600+((u-200)*3.95);
     }
 
-    function getCurrentTierByKwh(totalKwh) {
-      return totalKwh <= 200 ? '3.00 บ./หน่วย' : '3.95 บ./หน่วย';
+    function marginal(before,add){ return bill(before+add)-bill(before); }
+
+    function monthSessions(){
+      const key=monthKey();
+      return sessions.filter(s=>s.monthKey===key);
     }
 
-    function calculateSession(startMs, endMs = Date.now(), alreadyCompletedAcKwh = null) {
-      const seconds = Math.max(0, Math.floor((endMs - startMs) / 1000));
-      const hours = seconds / 3600;
-      const kwh = effectivePowerKw() * hours;
-      const completedAcKwh = alreadyCompletedAcKwh === null ? getCompletedAcKwhThisMonth() : alreadyCompletedAcKwh;
-      const beforeKwh = Number(state.settings.baseHouseKwh || 0) + completedAcKwh;
-      const tierCost = marginalCost(beforeKwh, kwh);
-      const flatCost = kwh * Number(state.settings.flatRate || 0);
-      const cost = Number(state.settings.baseHouseKwh || 0) > 0 ? tierCost : flatCost;
-      return { seconds, hours, kwh, cost, beforeKwh, afterKwh: beforeKwh + kwh };
+    function completedKwh(){
+      return monthSessions().reduce((sum,x)=>sum+Number(x.kwh||0),0);
     }
 
-    function currentMonthHistory() {
-      const key = monthKey();
-      return state.history.filter(item => item.monthKey === key);
+    function calcCost(kwh){
+      const base=Number(state.setup.baseHouseKwh||0);
+      const flat=Number(state.setup.flatRate||4);
+      const before=base+completedKwh();
+      return base>0 ? marginal(before,kwh) : kwh*flat;
     }
 
-    function getCompletedAcKwhThisMonth() {
-      return currentMonthHistory().reduce((sum, item) => sum + Number(item.kwh || 0), 0);
+    function live(active){
+      const seconds=Math.max(0,Math.floor((Date.now()-Number(active.startMs||Date.now()))/1000));
+      const kwh=Number(active.powerKw||0)*(seconds/3600);
+      const cost=calcCost(kwh);
+      return {seconds,kwh,cost};
     }
 
-    function recalculateCurrentMonthCosts() {
-      const key = monthKey();
-      const monthItems = state.history
-        .filter(item => item.monthKey === key)
-        .sort((a, b) => a.startMs - b.startMs);
+    function placeholder(label){
+      return `https://placehold.co/160x160/eaf2ff/2f80ff?text=${encodeURIComponent(label)}`;
+    }
 
-      let usedAcKwhBefore = 0;
-      for (const item of monthItems) {
-        const beforeKwh = Number(state.settings.baseHouseKwh || 0) + usedAcKwhBefore;
-        const cost = Number(state.settings.baseHouseKwh || 0) > 0
-          ? marginalCost(beforeKwh, Number(item.kwh || 0))
-          : Number(item.kwh || 0) * Number(state.settings.flatRate || 0);
-        item.cost = cost;
-        item.beforeKwh = beforeKwh;
-        item.afterKwh = beforeKwh + Number(item.kwh || 0);
-        usedAcKwhBefore += Number(item.kwh || 0);
+    function getDeviceImage(device={}){
+      if(device.imageUrl && String(device.imageUrl).trim()) return String(device.imageUrl).trim();
+      const text=`${device.name||''} ${device.category||''}`.toLowerCase();
+      if(text.includes('แอร์') || text.includes('air') || text.includes('ac') || text.includes('conditioner')) return placeholder('AC');
+      if(text.includes('คอม') || text.includes('computer') || text.includes('pc') || text.includes('laptop')) return placeholder('PC');
+      if(text.includes('พัดลม') || text.includes('fan')) return placeholder('Fan');
+      if(text.includes('tv') || text.includes('ทีวี') || text.includes('television')) return placeholder('TV');
+      return placeholder('Device');
+    }
+
+    function hydrate(){
+      el.homeCode.value=safeHomeCode();
+      el.memberName.value=state.setup.memberName||'';
+      el.baseHouseKwh.value=state.setup.baseHouseKwh||'';
+      el.flatRate.value=state.setup.flatRate||4;
+      el.profileAvatarUrl.value=state.setup.avatarUrl||'';
+      el.homeChip.textContent=safeHomeCode();
+      el.subtitle.textContent=`${safeHomeCode()} · ${state.setup.memberName||'Member'}`;
+      el.profileNameView.textContent=state.setup.memberName||'Member';
+      el.profileCodeView.textContent=safeHomeCode();
+      el.profileAvatarView.src=state.setup.avatarUrl||'./assets/profile-default.png';
+    }
+
+    function cloud(ok,text){
+      el.cloudText.textContent=text;
+      el.cloudDot.classList.toggle('ok',ok);
+    }
+
+    async function seedDevices(){
+      if(seeding) return;
+      const ref=collection(db,'homes',safeHomeCode(),'devices');
+      const snap=await getDocs(ref);
+      if(!snap.empty) return;
+      seeding=true;
+      try{
+        for(const d of defaultDevices) await addDoc(ref,d);
+      }finally{
+        seeding=false;
       }
     }
 
-    function updateSummary() {
-      const items = currentMonthHistory();
-      const totalCost = items.reduce((sum, x) => sum + Number(x.cost || 0), 0);
-      const totalSeconds = items.reduce((sum, x) => sum + Number(x.seconds || 0), 0);
-      const totalKwh = items.reduce((sum, x) => sum + Number(x.kwh || 0), 0);
-      const avg = items.length ? totalCost / items.length : 0;
-      const now = new Date();
-
-      const monthText = now.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-      const base = Number(state.settings.baseHouseKwh || 0);
-      el.monthLabel.textContent = base > 0
-        ? `${monthText} · ใช้ฐานไฟบ้าน ${money(base, 0)} kWh เพื่อคิดแบบขั้นบันได`
-        : `${monthText} · ยังไม่ calibrate จากบิล ระบบใช้ flat rate สำรองชั่วคราว`;
-
-      el.monthlyTotal.textContent = money(totalCost, 2);
-      el.monthlyHours.textContent = `${money(totalSeconds / 3600, 1)} ชม.`;
-      el.monthlyKwh.textContent = `${money(totalKwh, 2)} kWh`;
-      el.avgCost.textContent = `${money(avg, 2)} บ.`;
-
-      el.baseKwhText.textContent = `${money(base, 0)} kWh`;
-      el.acKwhText.textContent = `${money(totalKwh, 2)} kWh`;
-      el.estimatedTotalKwh.textContent = `${money(base + totalKwh, 2)} kWh`;
-
-      el.baselineStatus.textContent = state.settings.isCalibrated ? 'Calibrated' : 'Not set';
-      el.baselineStatus.className = state.settings.isCalibrated ? 'chip green' : 'chip orange';
-
-      if (state.settings.isCalibrated) {
-        el.calibrationNote.textContent = `ระบบใช้ฐานไฟบ้านที่ไม่ใช่แอร์ประมาณ ${money(base, 0)} kWh/เดือน แล้วคิดค่าแอร์เป็นส่วนต่างบนโครงสร้างค่าไฟขั้นบันได`;
-      } else {
-        el.calibrationNote.textContent = 'เดือนแรกให้ใช้แอพเก็บชั่วโมงแอร์ไปก่อน พอบิลไฟมาแล้วค่อยกรอกหน่วยไฟรวมจากบิล ระบบจะประเมินฐานไฟบ้านและคำนวณค่าแอร์ใหม่ให้ใกล้จริงขึ้น';
-      }
+    function unsubAll(){
+      unsubs.forEach(fn=>fn&&fn());
+      unsubs=[];
     }
 
-    function updateLive() {
-      const power = effectivePowerKw();
-      el.livePower.textContent = `${money(power, 2)} kW`;
+    async function subscribeCloud(){
+      unsubAll();
+      cloud(false,'Connecting Firebase...');
+      await seedDevices();
+      const home=safeHomeCode();
+      const devRef=collection(db,'homes',home,'devices');
+      const sesRef=collection(db,'homes',home,'sessions');
+      const actRef=collection(db,'homes',home,'activeSessions');
 
-      const base = Number(state.settings.baseHouseKwh || 0);
-      const completed = getCompletedAcKwhThisMonth();
-      el.currentTier.textContent = base > 0 ? getCurrentTierByKwh(base + completed) : `${money(state.settings.flatRate, 2)} บ./หน่วย`;
+      unsubs.push(onSnapshot(devRef,s=>{
+        devices=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+        renderAll();
+      }));
 
-      if (!state.running) {
-        document.body.classList.remove('running');
-        el.statusText.textContent = 'OFF · Ready to track';
-        el.timer.textContent = '00:00:00';
-        el.liveCost.textContent = '0.000';
-        el.liveKwh.textContent = '0.000 kWh';
-        el.toggleBtn.textContent = 'Turn ON ⏰';
-        el.toggleBtn.className = 'btn btn-primary';
-        el.cancelBtn.disabled = true;
+      unsubs.push(onSnapshot(query(sesRef,orderBy('startMs','desc'),limit(400)),s=>{
+        sessions=s.docs.map(d=>({id:d.id,...d.data()}));
+        renderAll();
+      },e=>{
+        console.error(e);
+        cloud(false,'Firebase error');
+      }));
+
+      unsubs.push(onSnapshot(query(actRef,orderBy('startMs','desc'),limit(200)),s=>{
+        activeSessions=s.docs.map(d=>({id:d.id,...d.data()}));
+        cloud(true,`Cloud connected · ${home}`);
+        renderAll();
+        startTicker();
+      },e=>{
+        console.error(e);
+        cloud(false,'Firebase error');
+      }));
+    }
+
+    function renderDashboard(){
+      const items=monthSessions();
+      let totalCost=items.reduce((s,x)=>s+Number(x.cost||0),0);
+      let totalKwh=items.reduce((s,x)=>s+Number(x.kwh||0),0);
+      let activeCost=0;
+      let activeKwh=0;
+      let maxSec=0;
+
+      activeSessions.forEach(a=>{
+        const l=live(a);
+        activeCost+=l.cost;
+        activeKwh+=l.kwh;
+        maxSec=Math.max(maxSec,l.seconds);
+      });
+
+      el.monthlyTotal.textContent=money(totalCost);
+      el.monthlyKwh.textContent=`${money(totalKwh,2)} kWh`;
+      el.sessionCount.textContent=items.length;
+      el.activeCount.textContent=activeSessions.length;
+      el.activeLiveCost.textContent=`${money(activeCost,2)} ฿`;
+      el.monthLabel.textContent=`${new Date().toLocaleDateString('th-TH',{month:'long',year:'numeric'})} · Home Code ${safeHomeCode()}`;
+      el.activeChip.textContent=`${activeSessions.length} running`;
+      el.activeLiveTimer.textContent=formatTimer(maxSec);
+      el.liveTotalCost.textContent=money(activeCost,3);
+      el.liveRunningCount.textContent=activeSessions.length;
+      el.liveTotalKwh.textContent=money(activeKwh,3);
+      el.miniActiveDevices.textContent=`${activeSessions.length} เครื่อง`;
+      el.miniActiveMembers.textContent=`${new Set(activeSessions.map(i=>i.memberName||'Unknown')).size} คน`;
+      el.miniLiveKwh.textContent=`${money(activeKwh,3)} kWh`;
+    }
+
+    function renderActive(){
+      if(!activeSessions.length){
+        el.activeList.innerHTML='<div class="empty">ตอนนี้ยังไม่มีอุปกรณ์ที่กำลังเปิดใช้งาน</div>';
         return;
       }
-
-      document.body.classList.add('running');
-      const result = calculateSession(state.running.startMs);
-      el.statusText.textContent = 'ON · Tracking now';
-      el.timer.textContent = formatTimer(result.seconds);
-      el.liveCost.textContent = money(result.cost, 3);
-      el.liveKwh.textContent = `${money(result.kwh, 3)} kWh`;
-      el.currentTier.textContent = getCurrentTierByKwh(result.afterKwh);
-      el.toggleBtn.textContent = 'Turn OFF 🛑';
-      el.toggleBtn.className = 'btn btn-dark';
-      el.cancelBtn.disabled = false;
-    }
-
-    function renderHistory() {
-      if (!state.history.length) {
-        el.historyList.innerHTML = `<div class="empty">ยังไม่มีประวัติการใช้งาน<br>เริ่มจับเวลาได้เลยเมื่อเปิดแอร์</div>`;
-        return;
-      }
-
-      el.historyList.innerHTML = state.history.slice(0, 50).map(item => {
-        const start = new Date(item.startMs);
-        const end = new Date(item.endMs);
-        const dateText = start.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-        const timeText = `${start.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
-        const tierText = item.beforeKwh ? `${money(item.beforeKwh, 0)} → ${money(item.afterKwh, 0)} kWh` : 'flat estimate';
+      el.activeList.innerHTML=activeSessions.map(a=>{
+        const l=live(a);
+        const img=a.deviceImage || getDeviceImage(a);
         return `
-          <div class="history-item">
-            <div class="history-icon">❄️</div>
-            <div class="history-main">
-              <strong>${dateText}</strong>
-              <span>${timeText} · ${formatTimer(item.seconds)} · ${money(item.kwh, 3)} kWh · ${tierText}</span>
+          <div class="active-item">
+            <div class="active-top">
+              <div class="row-media">
+                <img class="list-thumb" src="${img}" alt="${a.deviceName||'Device'}" onerror="this.src='${placeholder('Device')}'">
+                <div>
+                  <div class="active-title">${a.deviceName||'Device'}</div>
+                  <div class="active-sub">ผู้ใช้: ${a.memberName||'Unknown'} · ${a.deviceCategory||'Other'} · ${money(a.powerKw,3)} kW</div>
+                </div>
+              </div>
+              <button class="btn dark" style="min-height:40px" onclick="window.stopDevice('${a.id}')">Stop</button>
             </div>
-            <div class="history-cost">฿${money(item.cost, 2)}<small>${state.settings.isCalibrated ? 'tiered' : 'flat'}</small></div>
-          </div>
-        `;
+            <div class="active-stats">
+              <div class="stat"><span>เวลา</span><strong>${formatTimer(l.seconds)}</strong></div>
+              <div class="stat"><span>พลังงาน</span><strong>${money(l.kwh,3)} kWh</strong></div>
+              <div class="stat"><span>ค่าไฟ</span><strong>฿${money(l.cost,3)}</strong></div>
+            </div>
+          </div>`;
       }).join('');
     }
 
-    function hydrateSettings() {
-      el.subtitle.textContent = state.settings.acName;
-      el.acName.value = state.settings.acName;
-      el.powerKw.value = state.settings.powerKw;
-      el.target.value = state.settings.target;
-      el.efficiency.value = state.settings.efficiency;
-      el.flatRate.value = state.settings.flatRate;
-      el.billUnits.value = state.settings.lastBillUnits || '';
-      el.manualBaseKwh.value = state.settings.baseHouseKwh || '';
+    function renderDevices(){
+      if(!devices.length){
+        el.deviceGrid.innerHTML='<div class="empty" style="grid-column:1/-1">ยังไม่มี device</div>';
+        return;
+      }
+      el.deviceGrid.innerHTML=devices.map(d=>{
+        const act=activeSessions.find(a=>a.deviceId===d.id);
+        const img=getDeviceImage(d);
+        return `
+          <div class="device">
+            <div class="device-top">
+              <div class="row-media">
+                <img class="device-thumb" src="${img}" alt="${d.name||'Device'}" onerror="this.src='${placeholder('Device')}'">
+                <div>
+                  <h4>${d.name||'Device'}</h4>
+                  <div class="meta">${d.category||'Other'} · ${money(d.powerKw,3)} kW</div>
+                </div>
+              </div>
+              <div class="status ${act?'on':''}">${act?'ON':'OFF'}</div>
+            </div>
+            ${act?`<div class="note" style="margin:0">กำลังใช้งานโดย <b>${act.memberName||'Unknown'}</b></div>`:''}
+            <div class="device-actions">
+              ${act?`<button class="btn dark" onclick="window.stopDevice('${act.id}')">Stop</button>`:`<button class="btn primary" onclick="window.startDevice('${d.id}')">Start</button>`}
+              <button class="btn ghost" onclick="window.editDevice('${d.id}')">Edit</button>
+              <button class="btn danger" onclick="window.deleteDevice('${d.id}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
     }
 
-    function renderAll() {
-      recalculateCurrentMonthCosts();
-      hydrateSettings();
-      updateSummary();
-      updateLive();
+    function group(items,key){
+      const m=new Map();
+      items.forEach(x=>{
+        const name=x[key]||'Unknown';
+        const c=m.get(name)||{kwh:0,cost:0,seconds:0,count:0};
+        c.kwh+=Number(x.kwh||0);
+        c.cost+=Number(x.cost||0);
+        c.seconds+=Number(x.seconds||0);
+        c.count++;
+        m.set(name,c);
+      });
+      return [...m.entries()].sort((a,b)=>b[1].cost-a[1].cost);
+    }
+
+    function renderGrouped(items,key,container,icon){
+      const rows=group(items,key);
+      container.innerHTML=rows.length?rows.map(([n,v])=>`
+        <div class="row">
+          <div class="icon">${icon}</div>
+          <div><strong>${n}</strong><span>${money(v.kwh,2)} kWh · ${money(v.seconds/3600,1)} ชม. · ${v.count} รอบ</span></div>
+          <div class="cost">฿${money(v.cost)}</div>
+        </div>`).join(''):'<div class="empty">ยังไม่มีข้อมูลเดือนนี้</div>';
+    }
+
+    function renderChart(items,key,container){
+      const rows=group(items,key).slice(0,6);
+      const max=Math.max(...rows.map(r=>r[1].cost),1);
+      container.innerHTML=rows.length?rows.map(([n,v])=>`
+        <div class="bar-row">
+          <div class="bar-name">${n}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(5,(v.cost/max)*100)}%"></div></div>
+          <div class="bar-value">฿${money(v.cost,0)}</div>
+        </div>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>';
+    }
+
+    function renderHistory(){
+      if(!sessions.length){
+        el.historyList.innerHTML='<div class="empty">ยังไม่มีประวัติการใช้งาน</div>';
+        return;
+      }
+      el.historyList.innerHTML=sessions.slice(0,80).map(i=>{
+        const st=new Date(i.startMs);
+        const en=new Date(i.endMs);
+        const img=i.deviceImage || getDeviceImage(i);
+        return `
+          <div class="row">
+            <div class="row-media">
+              <img class="list-thumb" src="${img}" alt="${i.deviceName||'Device'}" onerror="this.src='${placeholder('Device')}'">
+              <div>
+                <strong>${i.memberName||'Unknown'} · ${i.deviceName||'Device'}</strong>
+                <span>${st.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})} · ${st.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} - ${en.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · ${formatTimer(i.seconds||0)} · ${money(i.kwh,3)} kWh</span>
+              </div>
+            </div>
+            <div class="cost">฿${money(i.cost)}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderAll(){
+      hydrate();
+      renderDashboard();
+      renderActive();
+      renderDevices();
+      const items=monthSessions();
+      renderGrouped(items,'memberName',el.memberSummary,'👤');
+      renderGrouped(items,'deviceName',el.deviceSummary,'⚡');
+      renderChart(items,'memberName',el.memberChart);
+      renderChart(items,'deviceName',el.deviceChart);
       renderHistory();
     }
 
-    function startSession() {
-      state.running = { startMs: Date.now() };
+    function saveSetup(){
+      state.setup.homeCode=(el.homeCode.value||'EVEHOME').trim().toUpperCase();
+      state.setup.memberName=(el.memberName.value||'Member').trim();
+      state.setup.baseHouseKwh=Math.max(0,Number(el.baseHouseKwh.value||0));
+      state.setup.flatRate=Math.max(0,Number(el.flatRate.value||4));
+      state.setup.avatarUrl=(el.profileAvatarUrl.value||'').trim();
       saveState();
-      updateLive();
-      startTicker();
-      showToast('เริ่มจับเวลาแล้ว');
+      renderAll();
+      subscribeCloud();
+      showToast('บันทึก Setup แล้ว');
     }
 
-    function stopSession() {
-      if (!state.running) return;
-      const endMs = Date.now();
-      const completedBefore = getCompletedAcKwhThisMonth();
-      const result = calculateSession(state.running.startMs, endMs, completedBefore);
+    function clearDeviceForm(){
+      editingDeviceId=null;
+      el.deviceFormTitle.textContent='Add Device';
+      el.saveDeviceBtn.textContent='Add Device';
+      el.newDeviceName.value='';
+      el.newDeviceCategory.value='';
+      el.newDeviceKw.value='';
+      el.newDeviceImage.value='';
+    }
 
-      if (result.seconds > 0) {
-        const item = {
-          id: String(Date.now()),
-          startMs: state.running.startMs,
-          endMs,
-          monthKey: monthKey(new Date(state.running.startMs)),
-          seconds: result.seconds,
-          kwh: result.kwh,
-          cost: result.cost,
-          powerKw: effectivePowerKw(),
-          beforeKwh: result.beforeKwh,
-          afterKwh: result.afterKwh,
-          calculationMode: Number(state.settings.baseHouseKwh || 0) > 0 ? 'tiered' : 'flat'
-        };
-        state.history.unshift(item);
-        state.history = state.history.slice(0, 50);
+    async function saveDevice(){
+      const home=safeHomeCode();
+      const name=(el.newDeviceName.value||'').trim();
+      const category=(el.newDeviceCategory.value||'Other').trim();
+      const powerKw=Number(el.newDeviceKw.value||0);
+      const imageUrl=(el.newDeviceImage.value||'').trim();
+
+      if(!name) return showToast('กรอกชื่ออุปกรณ์ก่อน');
+      if(!powerKw||powerKw<=0) return showToast('กรอก kW ให้ถูกต้อง');
+
+      const payload={name,category,powerKw,imageUrl};
+      try{
+        if(editingDeviceId){
+          await updateDoc(doc(db,'homes',home,'devices',editingDeviceId),payload);
+          showToast('แก้ไขอุปกรณ์แล้ว');
+        }else{
+          await addDoc(collection(db,'homes',home,'devices'),payload);
+          showToast('เพิ่มอุปกรณ์แล้ว');
+        }
+        clearDeviceForm();
+      }catch(e){
+        console.error(e);
+        showToast('บันทึกอุปกรณ์ไม่สำเร็จ');
       }
-
-      state.running = null;
-      recalculateCurrentMonthCosts();
-      saveState();
-      stopTicker();
-      renderAll();
-      showToast('บันทึกการใช้งานแล้ว');
     }
 
-    function cancelSession() {
-      if (!state.running) return;
-      state.running = null;
-      saveState();
-      stopTicker();
-      renderAll();
-      showToast('ยกเลิกรอบนี้แล้ว');
+    async function startDevice(id){
+      const member=(state.setup.memberName||'').trim();
+      if(!member) return showToast('กรอกชื่อผู้ใช้ก่อน');
+      const d=devices.find(x=>x.id===id);
+      if(!d) return showToast('หาอุปกรณ์ไม่เจอ');
+      if(activeSessions.some(a=>a.deviceId===id)) return showToast('อุปกรณ์นี้เปิดอยู่แล้ว');
+
+      try{
+        await addDoc(collection(db,'homes',safeHomeCode(),'activeSessions'),{
+          homeCode:safeHomeCode(),
+          memberName:member,
+          deviceId:d.id,
+          deviceName:d.name,
+          deviceCategory:d.category,
+          deviceImage:getDeviceImage(d),
+          powerKw:Number(d.powerKw||0),
+          startMs:Date.now(),
+          monthKey:monthKey(),
+          createdAt:serverTimestamp()
+        });
+        showToast(`เริ่ม ${d.name} แล้ว`);
+      }catch(e){
+        console.error(e);
+        showToast('Start ไม่สำเร็จ');
+      }
     }
 
-    function startTicker() { stopTicker(); intervalId = setInterval(updateLive, 1000); }
-    function stopTicker() { if (intervalId) clearInterval(intervalId); intervalId = null; }
+    async function stopDevice(id){
+      const a=activeSessions.find(x=>x.id===id);
+      if(!a) return showToast('ไม่พบ active session');
+      const endMs=Date.now();
+      const seconds=Math.max(0,Math.floor((endMs-Number(a.startMs||endMs))/1000));
+      const kwh=Number(a.powerKw||0)*(seconds/3600);
+      const cost=calcCost(kwh);
 
-    function saveSettings() {
-      state.settings = {
-        ...state.settings,
-        acName: el.acName.value.trim() || defaultState.settings.acName,
-        powerKw: Math.max(0.01, Number(el.powerKw.value || defaultState.settings.powerKw)),
-        target: Math.max(0, Number(el.target.value || 0)),
-        efficiency: el.efficiency.value,
-        flatRate: Math.max(0, Number(el.flatRate.value || defaultState.settings.flatRate))
-      };
-      recalculateCurrentMonthCosts();
-      saveState();
-      renderAll();
-      showToast('บันทึก Settings แล้ว');
+      try{
+        await addDoc(collection(db,'homes',safeHomeCode(),'sessions'),{
+          homeCode:safeHomeCode(),
+          memberName:a.memberName,
+          deviceId:a.deviceId,
+          deviceName:a.deviceName,
+          deviceCategory:a.deviceCategory,
+          deviceImage:a.deviceImage || getDeviceImage(a),
+          powerKw:Number(a.powerKw||0),
+          startMs:a.startMs,
+          endMs,
+          monthKey:monthKey(new Date(a.startMs)),
+          seconds,
+          kwh,
+          cost,
+          createdAt:serverTimestamp()
+        });
+        await deleteDoc(doc(db,'homes',safeHomeCode(),'activeSessions',id));
+        showToast(`หยุด ${a.deviceName} แล้ว`);
+      }catch(e){
+        console.error(e);
+        showToast('Stop ไม่สำเร็จ');
+      }
     }
 
-    function calibrateFromBill() {
-      const billUnits = Math.max(0, Number(el.billUnits.value || 0));
-      const acKwh = getCompletedAcKwhThisMonth();
+    function editDevice(id){
+      const d=devices.find(x=>x.id===id);
+      if(!d) return;
+      editingDeviceId=id;
+      el.deviceFormTitle.textContent='Edit Device';
+      el.saveDeviceBtn.textContent='Save Changes';
+      el.newDeviceName.value=d.name||'';
+      el.newDeviceCategory.value=d.category||'';
+      el.newDeviceKw.value=d.powerKw||'';
+      el.newDeviceImage.value=d.imageUrl||'';
+      window.scrollTo({top:0,behavior:'smooth'});
+      showToast('โหลดข้อมูลอุปกรณ์มาแก้ไขแล้ว');
+    }
 
-      if (billUnits <= 0) {
-        showToast('กรอกหน่วยไฟรวมจากบิลก่อน');
+    async function deleteDevice(id){
+      if(activeSessions.some(a=>a.deviceId===id)) return showToast('ลบไม่ได้ เพราะอุปกรณ์นี้เปิดอยู่');
+      const d=devices.find(x=>x.id===id);
+      if(!confirm(`ลบ "${d?.name||'device'}" ใช่ไหม?`)) return;
+      try{
+        await deleteDoc(doc(db,'homes',safeHomeCode(),'devices',id));
+        showToast('ลบอุปกรณ์แล้ว');
+      }catch(e){
+        console.error(e);
+        showToast('ลบอุปกรณ์ไม่สำเร็จ');
+      }
+    }
+
+    function openClearHistoryModal(){
+      if(!sessions.length){
+        showToast('ยังไม่มีประวัติให้ลบ');
         return;
       }
-
-      const base = Math.max(0, billUnits - acKwh);
-      state.settings.lastBillUnits = billUnits;
-      state.settings.baseHouseKwh = base;
-      state.settings.isCalibrated = true;
-      recalculateCurrentMonthCosts();
-      saveState();
-      renderAll();
-      showToast(`Calibrate แล้ว: ฐานบ้าน ${money(base, 0)} kWh`);
+      el.confirmText.textContent=`ต้องการลบประวัติการใช้งานทั้งหมดของบ้าน ${safeHomeCode()} ใช่ไหม? การลบนี้ย้อนกลับไม่ได้`;
+      el.confirmModal.classList.add('show');
     }
 
-    function saveManualBase() {
-      const base = Math.max(0, Number(el.manualBaseKwh.value || 0));
-      state.settings.baseHouseKwh = base;
-      state.settings.isCalibrated = base > 0;
-      recalculateCurrentMonthCosts();
-      saveState();
-      renderAll();
-      showToast('บันทึกฐานไฟบ้านแล้ว');
+    function closeClearHistoryModal(){
+      el.confirmModal.classList.remove('show');
     }
 
-    function resetMonth() {
-      if (!confirm('ต้องการลบเฉพาะข้อมูลของเดือนนี้ใช่ไหม?')) return;
-      const key = monthKey();
-      state.history = state.history.filter(item => item.monthKey !== key);
-      saveState();
-      renderAll();
-      showToast('Reset เดือนนี้แล้ว');
+    async function clearHistory(){
+      try{
+        const snap=await getDocs(collection(db,'homes',safeHomeCode(),'sessions'));
+        for(const item of snap.docs){
+          await deleteDoc(item.ref);
+        }
+        closeClearHistoryModal();
+        showToast('ลบประวัติเรียบร้อยแล้ว');
+      }catch(e){
+        console.error(e);
+        showToast('ลบประวัติไม่สำเร็จ');
+      }
     }
 
-    function clearHistory() {
-      if (!confirm('ต้องการลบประวัติทั้งหมดใช่ไหม?')) return;
-      state.history = [];
-      state.running = null;
-      saveState();
-      stopTicker();
-      renderAll();
-      showToast('ลบประวัติทั้งหมดแล้ว');
+    function exportCSV(){
+      if(!sessions.length) return showToast('ยังไม่มีข้อมูลให้ export');
+      const rows=[['member','device','category','start_time','end_time','duration_seconds','duration_hms','power_kw','kwh','cost_baht','home_code']];
+      sessions.forEach(i=>rows.push([
+        i.memberName,
+        i.deviceName,
+        i.deviceCategory,
+        new Date(i.startMs).toISOString(),
+        new Date(i.endMs).toISOString(),
+        i.seconds,
+        formatTimer(i.seconds||0),
+        Number(i.powerKw||0).toFixed(3),
+        Number(i.kwh||0).toFixed(4),
+        Number(i.cost||0).toFixed(2),
+        i.homeCode
+      ]));
+      const csv=rows.map(r=>r.map(c=>`"${String(c??'').replaceAll('"','""')}"`).join(',')).join('');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`home-energy-${safeHomeCode()}-${monthKey()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
-    function exportCSV() {
-  if (!state.history.length) {
-    showToast('ยังไม่มีข้อมูลให้ export');
-    return;
-  }
 
-  const rows = [
-    [
-      'start_time',
-      'end_time',
-      'duration_seconds',
-      'duration_hms',
-      'power_kw',
-      'kwh',
-      'before_total_kwh',
-      'after_total_kwh',
-      'cost_baht',
-      'mode'
-    ]
-  ];
+    function startTicker(){
+      if(tickTimer) clearInterval(tickTimer);
+      tickTimer=setInterval(()=>{
+        renderDashboard();
+        renderActive();
+      },1000);
+    }
 
-  state.history.forEach(item => {
-    rows.push([
-      new Date(item.startMs).toISOString(),
-      new Date(item.endMs).toISOString(),
-      item.seconds,
-      formatTimer(item.seconds),
-      Number(item.powerKw || 0).toFixed(3),
-      Number(item.kwh || 0).toFixed(4),
-      Number(item.beforeKwh || 0).toFixed(2),
-      Number(item.afterKwh || 0).toFixed(2),
-      Number(item.cost || 0).toFixed(2),
-      item.calculationMode || 'tiered'
-    ]);
-  });
-
-  const csv = rows
-    .map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(','))
-    .join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ac-usage-${monthKey()}.csv`;
-
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  URL.revokeObjectURL(url);
-  showToast('Export CSV แล้ว');
-}
     let toastTimer;
-    function showToast(message) {
+    function showToast(msg){
       clearTimeout(toastTimer);
-      el.toast.textContent = message;
+      el.toast.textContent=msg;
       el.toast.classList.add('show');
-      toastTimer = setTimeout(() => el.toast.classList.remove('show'), 1800);
+      toastTimer=setTimeout(()=>el.toast.classList.remove('show'),1800);
     }
+    el.saveSetupBtn.addEventListener('click',saveSetup);
+    el.refreshBtn.addEventListener('click',subscribeCloud);
+    el.saveDeviceBtn.addEventListener('click',saveDevice);
+    el.cancelEditBtn.addEventListener('click',clearDeviceForm);
+    el.exportBtn.addEventListener('click',exportCSV);
+    el.clearHistoryBtn.addEventListener('click',openClearHistoryModal);
+    el.cancelClearBtn.addEventListener('click',closeClearHistoryModal);
+    el.confirmClearBtn.addEventListener('click',clearHistory);
 
-    el.toggleBtn.addEventListener('click', () => state.running ? stopSession() : startSession());
-    el.cancelBtn.addEventListener('click', cancelSession);
-    el.saveSettingsBtn.addEventListener('click', saveSettings);
-    el.resetMonthBtn.addEventListener('click', resetMonth);
-    el.calibrateBtn.addEventListener('click', calibrateFromBill);
-    el.saveBaseBtn.addEventListener('click', saveManualBase);
-    el.clearHistoryBtn.addEventListener('click', clearHistory);
-    el.exportBtn.addEventListener('click', exportCSV);
+    window.startDevice=startDevice;
+    window.stopDevice=stopDevice;
+    window.deleteDevice=deleteDevice;
+    window.editDevice=editDevice;
 
+    hydrate();
     renderAll();
-    if (state.running) startTicker();
+    subscribeCloud();
+    startTicker();
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
     }
   </script>
 </body>
