@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f4f5f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AC Tracker">
+  <title>AC Tracker Minimal</title>
+
+  <style>
+    :root{
+      --bg: #f4f5f7;
+      --card: rgba(255,255,255,0.78);
+      --card-solid:#ffffff;
+      --text:#111214;
+      --sub:#6e7480;
+      --line:rgba(0,0,0,0.08);
+      --blue:#2f80ff;
+      --blue-soft:#eaf2ff;
+      --green:#20b26b;
+      --red:#ff5a5f;
+      --orange:#ff9f0a;
+      --shadow: 0 12px 40px rgba(17,18,20,0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(47,128,255,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,255,255,0.8), transparent 20%),
+        linear-gradient(180deg, #f7f8fa 0%, #eef1f6 100%);
+      color:var(--text);
+      font-family:
+        "SF Pro Display",
+        "SF Pro Text",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Inter",
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    }
+
+    .app{max-width:1180px;margin:0 auto;padding:24px;}
+
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;}
+    .topbar-left h1{margin:0;font-size:clamp(26px,4vw,34px);font-weight:800;letter-spacing:-0.045em;}
+    .topbar-left p{margin:6px 0 0;color:var(--sub);font-size:14px;}
+
+    .status-pill{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,0.72);border:1px solid rgba(255,255,255,0.8);backdrop-filter:blur(18px);box-shadow:var(--shadow);color:var(--sub);font-size:13px;white-space:nowrap;}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:#b0b6c2;transition:0.25s;}
+    body.running .status-dot{background:var(--green);box-shadow:0 0 0 6px rgba(32,178,107,0.12);}
+
+    .layout{display:grid;grid-template-columns:1.08fr 0.92fr;gap:18px;align-items:start;}
+    .stack{display:grid;gap:18px;}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,0.75);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:var(--shadow);border-radius:var(--radius-xl);overflow:hidden;}
+
+    .hero{padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.72));}
+    .hero-grid{display:grid;grid-template-columns:1fr 260px;gap:18px;align-items:center;}
+    .eyebrow{font-size:13px;color:var(--sub);margin-bottom:8px;}
+    .hero h2{margin:0;font-size:clamp(32px,5vw,56px);line-height:0.95;letter-spacing:-0.06em;font-weight:800;font-variant-numeric:tabular-nums;}
+    .hero .unit{font-size:18px;color:var(--sub);margin-left:8px;font-weight:500;}
+    .hero-sub{margin-top:10px;color:var(--sub);font-size:14px;line-height:1.5;max-width:460px;}
+    .hero-badges{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .badge{background:rgba(255,255,255,0.8);border:1px solid var(--line);border-radius:18px;padding:12px;}
+    .badge span{display:block;font-size:11px;color:var(--sub);margin-bottom:6px;}
+    .badge strong{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+
+    .ac-visual{height:220px;border-radius:24px;background:linear-gradient(180deg,#ffffff,#eef4ff);border:1px solid rgba(47,128,255,0.08);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .ac-visual::before{content:"";position:absolute;inset:18px;border-radius:28px;background:radial-gradient(circle at top,rgba(47,128,255,0.1),transparent 62%);}
+    .ac-visual svg{position:relative;z-index:1;}
+
+    .live-card,.settings-card,.history-card,.calibration-card{padding:20px;}
+    .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
+    .section-head h3{margin:0;font-size:18px;letter-spacing:-0.02em;}
+    .section-head p{margin:4px 0 0;font-size:12px;color:var(--sub);line-height:1.45;}
+    .chip{padding:8px 12px;background:var(--blue-soft);border-radius:999px;font-size:12px;color:var(--blue);font-weight:800;white-space:nowrap;}
+    .chip.orange{background:#fff5e5;color:var(--orange);}
+    .chip.green{background:#e9f8f1;color:var(--green);}
+
+    .live-main{text-align:center;padding:8px 0 18px;}
+    .timer{font-size:20px;color:var(--sub);font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:8px;}
+    .live-cost{font-size:clamp(54px,9vw,82px);line-height:0.92;font-weight:800;letter-spacing:-0.08em;font-variant-numeric:tabular-nums;}
+    .live-cost-sub{color:var(--sub);font-size:14px;margin-top:10px;}
+
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+    .stat{background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:14px 12px;}
+    .stat span{display:block;color:var(--sub);font-size:11px;margin-bottom:6px;}
+    .stat strong{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+
+    .actions,.settings-actions,.calibration-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .btn{border:none;cursor:pointer;border-radius:18px;min-height:54px;padding:14px 16px;font-size:15px;font-weight:800;transition:0.2s;}
+    .btn:active{transform:scale(0.99);}
+    .btn-primary{background:linear-gradient(180deg,#3b8cff,#2f80ff);color:white;box-shadow:0 10px 22px rgba(47,128,255,0.25);}
+    .btn-dark{background:#111214;color:white;}
+    .btn-soft{background:#f0f2f6;color:#2f3640;}
+    .btn-danger{background:#fff1f1;color:var(--red);}
+    .btn:disabled{opacity:0.55;cursor:not-allowed;box-shadow:none;}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .field{display:grid;gap:7px;}
+    .field.full{grid-column:1/-1;}
+    label{font-size:12px;color:var(--sub);font-weight:700;}
+    input,select{width:100%;border:none;outline:none;background:#ffffff;border:1px solid var(--line);border-radius:16px;padding:14px 14px;font-size:14px;color:var(--text);font-weight:700;}
+    input:focus,select:focus{border-color:rgba(47,128,255,0.28);box-shadow:0 0 0 4px rgba(47,128,255,0.10);}
+    .settings-actions,.calibration-actions{margin-top:14px;}
+
+    .note{margin-top:12px;background:#f7faff;border:1px solid rgba(47,128,255,0.1);color:#4d627f;border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.55;}
+    .note.warning{background:#fff9ed;border-color:rgba(255,159,10,0.22);color:#7a5516;}
+
+    .baseline-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+    .baseline-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;}
+    .baseline-box span{display:block;color:var(--sub);font-size:11px;margin-bottom:6px;}
+    .baseline-box strong{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
+
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;}
+    .small-btn{border:none;background:#f0f2f6;color:#586171;border-radius:999px;padding:8px 12px;cursor:pointer;font-size:12px;font-weight:800;}
+    .history-list{display:grid;gap:10px;max-height:560px;overflow:auto;padding-right:4px;}
+    .history-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:14px;}
+    .history-icon{width:42px;height:42px;border-radius:14px;background:#eef5ff;display:grid;place-items:center;color:var(--blue);font-size:18px;}
+    .history-main strong{display:block;font-size:14px;margin-bottom:3px;}
+    .history-main span{color:var(--sub);font-size:12px;line-height:1.45;}
+    .history-cost{font-size:15px;font-weight:800;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;}
+    .history-cost small{display:block;font-size:11px;color:var(--sub);font-weight:700;margin-top:2px;}
+    .empty{text-align:center;color:var(--sub);padding:34px 12px;border-radius:20px;border:1px dashed var(--line);background:#ffffff;line-height:1.6;}
+
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:rgba(17,18,20,0.92);color:white;padding:12px 16px;border-radius:999px;font-size:13px;font-weight:800;transition:0.24s;z-index:50;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media (max-width:960px){.layout{grid-template-columns:1fr;}}
+    @media (max-width:680px){
+      .app{padding:16px}.topbar{align-items:flex-start;flex-direction:column}.hero-grid{grid-template-columns:1fr}.hero-badges,.stats,.form-grid,.actions,.settings-actions,.calibration-actions,.baseline-panel{grid-template-columns:1fr}.history-item{grid-template-columns:auto 1fr}.history-cost{grid-column:2;text-align:left;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>AC Usage Tracker</h1>
+        <p id="subtitle">Mitsubishi AC · Living Room</p>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span><span id="statusText">OFF · Ready to track</span></div>
+    </div>
+
+    <div class="layout">
+      <div class="stack">
+        <section class="card hero">
+          <div class="hero-grid">
+            <div>
+              <div class="eyebrow">ค่าไฟแอร์เดือนนี้</div>
+              <div><h2><span id="monthlyTotal">0.00</span><span class="unit">บาท</span></h2></div>
+              <div class="hero-sub" id="monthLabel">คำนวณแบบค่าไฟขั้นบันได โดยใช้ฐานไฟบ้านจากบิลล่าสุด</div>
+
+              <div class="hero-badges">
+                <div class="badge"><span>ชั่วโมงรวม</span><strong id="monthlyHours">0.0 ชม.</strong></div>
+                <div class="badge"><span>พลังงานแอร์</span><strong id="monthlyKwh">0.00 kWh</strong></div>
+                <div class="badge"><span>เฉลี่ย / ครั้ง</span><strong id="avgCost">0.00 บ.</strong></div>
+              </div>
+            </div>
+
+            <div class="ac-visual">
+              <svg width="210" height="170" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#EAF2FF"/></linearGradient>
+                  <linearGradient id="airGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8DD1FF" stop-opacity="0.9"/><stop offset="100%" stop-color="#DDF4FF" stop-opacity="0"/></linearGradient>
+                </defs>
+                <rect x="25" y="18" width="160" height="54" rx="20" fill="url(#bodyGrad)" stroke="#DDE8F5"/>
+                <rect x="40" y="34" width="98" height="10" rx="5" fill="#EDF4FC"/>
+                <circle cx="162" cy="45" r="5" fill="#C7D9EF"/>
+                <rect x="42" y="63" width="126" height="8" rx="4" fill="#DDEBFA"/>
+                <path d="M65 84 C58 104, 60 121, 73 138" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M105 84 C98 108, 100 126, 112 144" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M145 84 C138 104, 140 121, 153 138" stroke="url(#airGrad)" stroke-width="8" stroke-linecap="round"/>
+                <ellipse cx="105" cy="152" rx="72" ry="10" fill="#E9F2FF"/>
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        <section class="card live-card">
+          <div class="section-head">
+            <div><h3>Real-time Tracking</h3><p>กดเริ่มเมื่อเปิดแอร์ และกดหยุดเมื่อปิดแอร์</p></div>
+            <div class="chip" id="modeChip">Tiered Bill</div>
+          </div>
+
+          <div class="live-main">
+            <div class="timer" id="timer">00:00:00</div>
+            <div class="live-cost" id="liveCost">0.000</div>
+            <div class="live-cost-sub">บาท · ค่าไฟรอบปัจจุบันแบบขั้นบันได</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><span>AC Power</span><strong id="livePower">1.12 kW</strong></div>
+            <div class="stat"><span>Energy Used</span><strong id="liveKwh">0.000 kWh</strong></div>
+            <div class="stat"><span>Current Tier</span><strong id="currentTier">-</strong></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="toggleBtn">Turn ON ⏰</button>
+            <button class="btn btn-soft" id="cancelBtn" disabled>Cancel Session</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="card settings-card">
+          <div class="section-head"><div><h3>Settings</h3><p>ตั้งค่าแอร์ของคุณ</p></div></div>
+
+          <div class="form-grid">
+            <div class="field full"><label for="acName">ชื่อแอร์ / ห้อง</label><input id="acName" type="text" placeholder="เช่น Mitsubishi AC · Living Room"></div>
+            <div class="field"><label for="powerKw">กำลังไฟฟ้าจากป้ายเครื่อง (kW)</label><input id="powerKw" type="number" step="0.01" min="0.1" placeholder="1.12"></div>
+            <div class="field"><label for="target">งบค่าแอร์ / เดือน</label><input id="target" type="number" step="1" min="0" placeholder="1000"></div>
+            <div class="field"><label for="efficiency">โหมดประมาณการ</label><select id="efficiency"><option value="fixed">Fixed kW</option><option value="inverter">Inverter Estimate (-25%)</option></select></div>
+            <div class="field"><label for="flatRate">Flat rate สำรอง (บาท/kWh)</label><input id="flatRate" type="number" step="0.01" min="0" placeholder="4.00"></div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="btn btn-dark" id="saveSettingsBtn">Save Settings</button>
+            <button class="btn btn-danger" id="resetMonthBtn">Reset Month</button>
+          </div>
+          <div class="note">ใช้กำลังไฟฟ้า 1.12 kW จากป้ายแอร์ Mitsubishi ของคุณได้เลย ส่วนค่าไฟจะคำนวณแบบขั้นบันไดจากฐานไฟบ้านด้านล่าง</div>
+        </section>
+
+        <section class="card calibration-card">
+          <div class="section-head">
+            <div><h3>Bill Calibration</h3><p>วิธีนี้ง่ายและใกล้จริงสุด: ตอนบิลมา ให้กรอก “หน่วยไฟรวมจากบิล” แล้วแอพจะแยกฐานไฟบ้านที่ไม่ใช่แอร์ให้</p></div>
+            <div class="chip green" id="baselineStatus">Not set</div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field"><label for="billUnits">หน่วยไฟรวมจากบิลล่าสุด</label><input id="billUnits" type="number" step="1" min="0" placeholder="เช่น 480"></div>
+            <div class="field"><label for="manualBaseKwh">ฐานไฟบ้านที่ไม่ใช่แอร์ / เดือน</label><input id="manualBaseKwh" type="number" step="1" min="0" placeholder="คำนวณให้อัตโนมัติ"></div>
+          </div>
+
+          <div class="calibration-actions">
+            <button class="btn btn-primary" id="calibrateBtn">Calibrate from Bill</button>
+            <button class="btn btn-soft" id="saveBaseBtn">Save Manual Base</button>
+          </div>
+
+          <div class="baseline-panel">
+            <div class="baseline-box"><span>ฐานไฟบ้าน</span><strong id="baseKwhText">0 kWh</strong></div>
+            <div class="baseline-box"><span>แอร์เดือนนี้</span><strong id="acKwhText">0 kWh</strong></div>
+            <div class="baseline-box"><span>หน่วยรวมประเมิน</span><strong id="estimatedTotalKwh">0 kWh</strong></div>
+          </div>
+
+          <div class="note warning" id="calibrationNote">เดือนแรกให้ใช้แอพเก็บชั่วโมงแอร์ไปก่อน พอบิลไฟมาแล้วค่อยกรอกหน่วยไฟรวมจากบิล ระบบจะประเมินฐานไฟบ้านและคำนวณค่าแอร์ใหม่ให้ใกล้จริงขึ้น</div>
+        </section>
+
+        <section class="card history-card">
+          <div class="section-head">
+            <div><h3>Usage History</h3><p>เก็บรายการล่าสุดในเครื่องนี้</p></div>
+            <div class="toolbar"><button class="small-btn" id="exportBtn">Export CSV</button><button class="small-btn" id="clearHistoryBtn">Clear</button></div>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    const STORAGE_KEY = 'ac_tracker_tiered_v3';
+
+    const defaultState = {
+      settings: {
+        acName: 'Mitsubishi AC · Living Room',
+        powerKw: 1.12,
+        target: 1000,
+        efficiency: 'fixed',
+        flatRate: 4.0,
+        baseHouseKwh: 0,
+        lastBillUnits: 0,
+        isCalibrated: false
+      },
+      history: [],
+      running: null
+    };
+
+    let state = loadState();
+    let intervalId = null;
+
+    const el = {
+      subtitle: document.getElementById('subtitle'),
+      statusText: document.getElementById('statusText'),
+      monthlyTotal: document.getElementById('monthlyTotal'),
+      monthLabel: document.getElementById('monthLabel'),
+      monthlyHours: document.getElementById('monthlyHours'),
+      monthlyKwh: document.getElementById('monthlyKwh'),
+      avgCost: document.getElementById('avgCost'),
+      timer: document.getElementById('timer'),
+      liveCost: document.getElementById('liveCost'),
+      livePower: document.getElementById('livePower'),
+      liveKwh: document.getElementById('liveKwh'),
+      currentTier: document.getElementById('currentTier'),
+      toggleBtn: document.getElementById('toggleBtn'),
+      cancelBtn: document.getElementById('cancelBtn'),
+      acName: document.getElementById('acName'),
+      powerKw: document.getElementById('powerKw'),
+      target: document.getElementById('target'),
+      efficiency: document.getElementById('efficiency'),
+      flatRate: document.getElementById('flatRate'),
+      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+      resetMonthBtn: document.getElementById('resetMonthBtn'),
+      billUnits: document.getElementById('billUnits'),
+      manualBaseKwh: document.getElementById('manualBaseKwh'),
+      calibrateBtn: document.getElementById('calibrateBtn'),
+      saveBaseBtn: document.getElementById('saveBaseBtn'),
+      baselineStatus: document.getElementById('baselineStatus'),
+      baseKwhText: document.getElementById('baseKwhText'),
+      acKwhText: document.getElementById('acKwhText'),
+      estimatedTotalKwh: document.getElementById('estimatedTotalKwh'),
+      calibrationNote: document.getElementById('calibrationNote'),
+      historyList: document.getElementById('historyList'),
+      exportBtn: document.getElementById('exportBtn'),
+      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+      toast: document.getElementById('toast')
+    };
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return saved ? { ...defaultState, ...saved, settings: { ...defaultState.settings, ...saved.settings } } : structuredClone(defaultState);
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+    function effectivePowerKw() {
+      const base = Number(state.settings.powerKw) || 0;
+      return state.settings.efficiency === 'inverter' ? base * 0.75 : base;
+    }
+
+    function money(val, digits = 2) {
+      return Number(val || 0).toLocaleString('th-TH', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+
+    function formatTimer(seconds) {
+      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function monthKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; }
+
+    // อัตราขั้นบันไดแบบง่ายตามภาพที่ผู้ใช้ส่ง:
+    // 0-200 หน่วย = 3 บาท/หน่วย, ส่วนที่เกิน 200 หน่วย = 3.95 บาท/หน่วย
+    // หมายเหตุ: ถ้าต้องการตรงบิลแบบ 100% ควรเพิ่ม Ft, VAT, ค่าบริการรายเดือนจากบิลจริงในอนาคต
+    function calculateBillByTier(kwh) {
+      const units = Math.max(0, Number(kwh) || 0);
+      if (units <= 200) return units * 3.00;
+      return (200 * 3.00) + ((units - 200) * 3.95);
+    }
+
+    function marginalCost(beforeKwh, addedKwh) {
+      return calculateBillByTier(beforeKwh + addedKwh) - calculateBillByTier(beforeKwh);
+    }
+
+    function getCurrentTierByKwh(totalKwh) {
+      return totalKwh <= 200 ? '3.00 บ./หน่วย' : '3.95 บ./หน่วย';
+    }
+
+    function calculateSession(startMs, endMs = Date.now(), alreadyCompletedAcKwh = null) {
+      const seconds = Math.max(0, Math.floor((endMs - startMs) / 1000));
+      const hours = seconds / 3600;
+      const kwh = effectivePowerKw() * hours;
+      const completedAcKwh = alreadyCompletedAcKwh === null ? getCompletedAcKwhThisMonth() : alreadyCompletedAcKwh;
+      const beforeKwh = Number(state.settings.baseHouseKwh || 0) + completedAcKwh;
+      const tierCost = marginalCost(beforeKwh, kwh);
+      const flatCost = kwh * Number(state.settings.flatRate || 0);
+      const cost = Number(state.settings.baseHouseKwh || 0) > 0 ? tierCost : flatCost;
+      return { seconds, hours, kwh, cost, beforeKwh, afterKwh: beforeKwh + kwh };
+    }
+
+    function currentMonthHistory() {
+      const key = monthKey();
+      return state.history.filter(item => item.monthKey === key);
+    }
+
+    function getCompletedAcKwhThisMonth() {
+      return currentMonthHistory().reduce((sum, item) => sum + Number(item.kwh || 0), 0);
+    }
+
+    function recalculateCurrentMonthCosts() {
+      const key = monthKey();
+      const monthItems = state.history
+        .filter(item => item.monthKey === key)
+        .sort((a, b) => a.startMs - b.startMs);
+
+      let usedAcKwhBefore = 0;
+      for (const item of monthItems) {
+        const beforeKwh = Number(state.settings.baseHouseKwh || 0) + usedAcKwhBefore;
+        const cost = Number(state.settings.baseHouseKwh || 0) > 0
+          ? marginalCost(beforeKwh, Number(item.kwh || 0))
+          : Number(item.kwh || 0) * Number(state.settings.flatRate || 0);
+        item.cost = cost;
+        item.beforeKwh = beforeKwh;
+        item.afterKwh = beforeKwh + Number(item.kwh || 0);
+        usedAcKwhBefore += Number(item.kwh || 0);
+      }
+    }
+
+    function updateSummary() {
+      const items = currentMonthHistory();
+      const totalCost = items.reduce((sum, x) => sum + Number(x.cost || 0), 0);
+      const totalSeconds = items.reduce((sum, x) => sum + Number(x.seconds || 0), 0);
+      const totalKwh = items.reduce((sum, x) => sum + Number(x.kwh || 0), 0);
+      const avg = items.length ? totalCost / items.length : 0;
+      const now = new Date();
+
+      const monthText = now.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      const base = Number(state.settings.baseHouseKwh || 0);
+      el.monthLabel.textContent = base > 0
+        ? `${monthText} · ใช้ฐานไฟบ้าน ${money(base, 0)} kWh เพื่อคิดแบบขั้นบันได`
+        : `${monthText} · ยังไม่ calibrate จากบิล ระบบใช้ flat rate สำรองชั่วคราว`;
+
+      el.monthlyTotal.textContent = money(totalCost, 2);
+      el.monthlyHours.textContent = `${money(totalSeconds / 3600, 1)} ชม.`;
+      el.monthlyKwh.textContent = `${money(totalKwh, 2)} kWh`;
+      el.avgCost.textContent = `${money(avg, 2)} บ.`;
+
+      el.baseKwhText.textContent = `${money(base, 0)} kWh`;
+      el.acKwhText.textContent = `${money(totalKwh, 2)} kWh`;
+      el.estimatedTotalKwh.textContent = `${money(base + totalKwh, 2)} kWh`;
+
+      el.baselineStatus.textContent = state.settings.isCalibrated ? 'Calibrated' : 'Not set';
+      el.baselineStatus.className = state.settings.isCalibrated ? 'chip green' : 'chip orange';
+
+      if (state.settings.isCalibrated) {
+        el.calibrationNote.textContent = `ระบบใช้ฐานไฟบ้านที่ไม่ใช่แอร์ประมาณ ${money(base, 0)} kWh/เดือน แล้วคิดค่าแอร์เป็นส่วนต่างบนโครงสร้างค่าไฟขั้นบันได`;
+      } else {
+        el.calibrationNote.textContent = 'เดือนแรกให้ใช้แอพเก็บชั่วโมงแอร์ไปก่อน พอบิลไฟมาแล้วค่อยกรอกหน่วยไฟรวมจากบิล ระบบจะประเมินฐานไฟบ้านและคำนวณค่าแอร์ใหม่ให้ใกล้จริงขึ้น';
+      }
+    }
+
+    function updateLive() {
+      const power = effectivePowerKw();
+      el.livePower.textContent = `${money(power, 2)} kW`;
+
+      const base = Number(state.settings.baseHouseKwh || 0);
+      const completed = getCompletedAcKwhThisMonth();
+      el.currentTier.textContent = base > 0 ? getCurrentTierByKwh(base + completed) : `${money(state.settings.flatRate, 2)} บ./หน่วย`;
+
+      if (!state.running) {
+        document.body.classList.remove('running');
+        el.statusText.textContent = 'OFF · Ready to track';
+        el.timer.textContent = '00:00:00';
+        el.liveCost.textContent = '0.000';
+        el.liveKwh.textContent = '0.000 kWh';
+        el.toggleBtn.textContent = 'Turn ON ⏰';
+        el.toggleBtn.className = 'btn btn-primary';
+        el.cancelBtn.disabled = true;
+        return;
+      }
+
+      document.body.classList.add('running');
+      const result = calculateSession(state.running.startMs);
+      el.statusText.textContent = 'ON · Tracking now';
+      el.timer.textContent = formatTimer(result.seconds);
+      el.liveCost.textContent = money(result.cost, 3);
+      el.liveKwh.textContent = `${money(result.kwh, 3)} kWh`;
+      el.currentTier.textContent = getCurrentTierByKwh(result.afterKwh);
+      el.toggleBtn.textContent = 'Turn OFF 🛑';
+      el.toggleBtn.className = 'btn btn-dark';
+      el.cancelBtn.disabled = false;
+    }
+
+    function renderHistory() {
+      if (!state.history.length) {
+        el.historyList.innerHTML = `<div class="empty">ยังไม่มีประวัติการใช้งาน<br>เริ่มจับเวลาได้เลยเมื่อเปิดแอร์</div>`;
+        return;
+      }
+
+      el.historyList.innerHTML = state.history.slice(0, 50).map(item => {
+        const start = new Date(item.startMs);
+        const end = new Date(item.endMs);
+        const dateText = start.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        const timeText = `${start.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+        const tierText = item.beforeKwh ? `${money(item.beforeKwh, 0)} → ${money(item.afterKwh, 0)} kWh` : 'flat estimate';
+        return `
+          <div class="history-item">
+            <div class="history-icon">❄️</div>
+            <div class="history-main">
+              <strong>${dateText}</strong>
+              <span>${timeText} · ${formatTimer(item.seconds)} · ${money(item.kwh, 3)} kWh · ${tierText}</span>
+            </div>
+            <div class="history-cost">฿${money(item.cost, 2)}<small>${state.settings.isCalibrated ? 'tiered' : 'flat'}</small></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function hydrateSettings() {
+      el.subtitle.textContent = state.settings.acName;
+      el.acName.value = state.settings.acName;
+      el.powerKw.value = state.settings.powerKw;
+      el.target.value = state.settings.target;
+      el.efficiency.value = state.settings.efficiency;
+      el.flatRate.value = state.settings.flatRate;
+      el.billUnits.value = state.settings.lastBillUnits || '';
+      el.manualBaseKwh.value = state.settings.baseHouseKwh || '';
+    }
+
+    function renderAll() {
+      recalculateCurrentMonthCosts();
+      hydrateSettings();
+      updateSummary();
+      updateLive();
+      renderHistory();
+    }
+
+    function startSession() {
+      state.running = { startMs: Date.now() };
+      saveState();
+      updateLive();
+      startTicker();
+      showToast('เริ่มจับเวลาแล้ว');
+    }
+
+    function stopSession() {
+      if (!state.running) return;
+      const endMs = Date.now();
+      const completedBefore = getCompletedAcKwhThisMonth();
+      const result = calculateSession(state.running.startMs, endMs, completedBefore);
+
+      if (result.seconds > 0) {
+        const item = {
+          id: String(Date.now()),
+          startMs: state.running.startMs,
+          endMs,
+          monthKey: monthKey(new Date(state.running.startMs)),
+          seconds: result.seconds,
+          kwh: result.kwh,
+          cost: result.cost,
+          powerKw: effectivePowerKw(),
+          beforeKwh: result.beforeKwh,
+          afterKwh: result.afterKwh,
+          calculationMode: Number(state.settings.baseHouseKwh || 0) > 0 ? 'tiered' : 'flat'
+        };
+        state.history.unshift(item);
+        state.history = state.history.slice(0, 50);
+      }
+
+      state.running = null;
+      recalculateCurrentMonthCosts();
+      saveState();
+      stopTicker();
+      renderAll();
+      showToast('บันทึกการใช้งานแล้ว');
+    }
+
+    function cancelSession() {
+      if (!state.running) return;
+      state.running = null;
+      saveState();
+      stopTicker();
+      renderAll();
+      showToast('ยกเลิกรอบนี้แล้ว');
+    }
+
+    function startTicker() { stopTicker(); intervalId = setInterval(updateLive, 1000); }
+    function stopTicker() { if (intervalId) clearInterval(intervalId); intervalId = null; }
+
+    function saveSettings() {
+      state.settings = {
+        ...state.settings,
+        acName: el.acName.value.trim() || defaultState.settings.acName,
+        powerKw: Math.max(0.01, Number(el.powerKw.value || defaultState.settings.powerKw)),
+        target: Math.max(0, Number(el.target.value || 0)),
+        efficiency: el.efficiency.value,
+        flatRate: Math.max(0, Number(el.flatRate.value || defaultState.settings.flatRate))
+      };
+      recalculateCurrentMonthCosts();
+      saveState();
+      renderAll();
+      showToast('บันทึก Settings แล้ว');
+    }
+
+    function calibrateFromBill() {
+      const billUnits = Math.max(0, Number(el.billUnits.value || 0));
+      const acKwh = getCompletedAcKwhThisMonth();
+
+      if (billUnits <= 0) {
+        showToast('กรอกหน่วยไฟรวมจากบิลก่อน');
+        return;
+      }
+
+      const base = Math.max(0, billUnits - acKwh);
+      state.settings.lastBillUnits = billUnits;
+      state.settings.baseHouseKwh = base;
+      state.settings.isCalibrated = true;
+      recalculateCurrentMonthCosts();
+      saveState();
+      renderAll();
+      showToast(`Calibrate แล้ว: ฐานบ้าน ${money(base, 0)} kWh`);
+    }
+
+    function saveManualBase() {
+      const base = Math.max(0, Number(el.manualBaseKwh.value || 0));
+      state.settings.baseHouseKwh = base;
+      state.settings.isCalibrated = base > 0;
+      recalculateCurrentMonthCosts();
+      saveState();
+      renderAll();
+      showToast('บันทึกฐานไฟบ้านแล้ว');
+    }
+
+    function resetMonth() {
+      if (!confirm('ต้องการลบเฉพาะข้อมูลของเดือนนี้ใช่ไหม?')) return;
+      const key = monthKey();
+      state.history = state.history.filter(item => item.monthKey !== key);
+      saveState();
+      renderAll();
+      showToast('Reset เดือนนี้แล้ว');
+    }
+
+    function clearHistory() {
+      if (!confirm('ต้องการลบประวัติทั้งหมดใช่ไหม?')) return;
+      state.history = [];
+      state.running = null;
+      saveState();
+      stopTicker();
+      renderAll();
+      showToast('ลบประวัติทั้งหมดแล้ว');
+    }
+    function exportCSV() {
+  if (!state.history.length) {
+    showToast('ยังไม่มีข้อมูลให้ export');
+    return;
+  }
+
+  const rows = [
+    [
+      'start_time',
+      'end_time',
+      'duration_seconds',
+      'duration_hms',
+      'power_kw',
+      'kwh',
+      'before_total_kwh',
+      'after_total_kwh',
+      'cost_baht',
+      'mode'
+    ]
+  ];
+
+  state.history.forEach(item => {
+    rows.push([
+      new Date(item.startMs).toISOString(),
+      new Date(item.endMs).toISOString(),
+      item.seconds,
+      formatTimer(item.seconds),
+      Number(item.powerKw || 0).toFixed(3),
+      Number(item.kwh || 0).toFixed(4),
+      Number(item.beforeKwh || 0).toFixed(2),
+      Number(item.afterKwh || 0).toFixed(2),
+      Number(item.cost || 0).toFixed(2),
+      item.calculationMode || 'tiered'
+    ]);
+  });
+
+  const csv = rows
+    .map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ac-usage-${monthKey()}.csv`;
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+  showToast('Export CSV แล้ว');
+}
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      el.toast.textContent = message;
+      el.toast.classList.add('show');
+      toastTimer = setTimeout(() => el.toast.classList.remove('show'), 1800);
+    }
+
+    el.toggleBtn.addEventListener('click', () => state.running ? stopSession() : startSession());
+    el.cancelBtn.addEventListener('click', cancelSession);
+    el.saveSettingsBtn.addEventListener('click', saveSettings);
+    el.resetMonthBtn.addEventListener('click', resetMonth);
+    el.calibrateBtn.addEventListener('click', calibrateFromBill);
+    el.saveBaseBtn.addEventListener('click', saveManualBase);
+    el.clearHistoryBtn.addEventListener('click', clearHistory);
+    el.exportBtn.addEventListener('click', exportCSV);
+
+    renderAll();
+    if (state.running) startTicker();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
